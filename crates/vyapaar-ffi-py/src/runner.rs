@@ -95,6 +95,7 @@ impl StrategyRunner {
     }
 
     /// Gate an order through the internal risk engine (no dispatch).
+    #[pyo3(signature = (order, ts_iso=None))]
     fn check_order(
         &mut self,
         order: &Bound<'_, OrderRequest>,
@@ -108,6 +109,7 @@ impl StrategyRunner {
 
     /// Gate, simulate a fill at the limit price, record it, ack it as FILLED,
     /// and dispatch `on_order_event` to the Python strategy.
+    #[pyo3(signature = (order, ts_iso=None))]
     fn submit_order<'py>(
         &mut self,
         py: Python<'py>,

@@ -108,6 +108,7 @@ impl RiskEngine {
     /// Synchronously gate an outgoing order before it reaches a broker.
     ///
     /// Raises [`crate::RiskRefused`] with the machine-readable refusal `rule`.
+    #[pyo3(signature = (order, ts_iso=None))]
     fn check_order(
         &mut self,
         order: &Bound<'_, OrderRequest>,
@@ -120,6 +121,7 @@ impl RiskEngine {
     }
 
     /// Zero-allocation hot-path order gate (<15 µs target).
+    #[pyo3(signature = (algo_id, instrument, quantity, limit_price=None, ts_iso=None))]
     fn check_order_fast(
         &mut self,
         algo_id: &str,
@@ -146,6 +148,7 @@ impl RiskEngine {
     }
 
     /// Gate a closed-grammar AI `Decision` (serde JSON string).
+    #[pyo3(signature = (decision_json, ts_iso=None))]
     fn check_decision(&mut self, decision_json: &str, ts_iso: Option<&str>) -> PyResult<()> {
         let now = now_or_utc(ts_iso)?;
         let decision = vyapaar_core::Decision::from_json_str(decision_json)

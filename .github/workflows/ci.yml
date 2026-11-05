@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  rust:
+    name: Rust gate (fmt / clippy / test)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      # `cargo test --workspace` builds crates/vyapaar-ffi-py, whose PyO3 build
+      # script requires a CPython with development headers. setup-python
+      # provides one; PYO3_PYTHON exported here overrides the repo-local
+      # default in .cargo/config.toml.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Point PyO3 at the CI CPython
+        run: echo "PYO3_PYTHON=$(which python)" >> "$GITHUB_ENV"
+      - name: Check formatting
+        run: cargo fmt --check
+      - name: Clippy (deny warnings)
+        run: cargo clippy --all-targets -- -D warnings
+      - name: Workspace tests
+        run: cargo test --workspace
+      - name: Enforce tests only in tests/ (no #[cfg(test)] in src/)
+        run: |
+          if grep -rn "#\[cfg(test)\]" crates/*/src/; then
+            echo "::error::Found #[cfg(test)] in crates/*/src/. Tests must live in tests/ (parallel to src/)."
+            exit 1
+          fi
+          echo "OK: no #[cfg(test)] found in crates/*/src/."
+
+  python:
+    name: Python wheel (maturin develop + pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Python build/test deps
+        run: pip install maturin pytest pyarrow
+      - name: Point PyO3 at the CI CPython
+        run: echo "PYO3_PYTHON=$(which python)" >> "$GITHUB_ENV"
+      - name: Codegen crate tests
+        run: cargo test -p vyapaar-ffi-codegen
+      - name: Build & install editable wheel
+        run: maturin develop
+      - name: Run pytest suite
+        run: pytest -q python/tests
