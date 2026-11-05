@@ -17,6 +17,13 @@ repository = "https://github.com/vyapaar-labs/vyapaar-ffi"
 vyapaar-core = { path = "../vyapaar-core" }
 vyapaar-risk = { path = "../vyapaar-risk" }
 
+# Indian market microstructure pack (NseCalendar, statutory costs, F&O grammar)
+# and live-feed/lakehouse store — declared per the Tier-4 playbook so the SDK
+# can bridge market data into Python; consumed by future data-bridge features.
+vyapaar-market-finance = { path = "../vyapaar-market/crates/vyapaar-market-finance" }
+vyapaar-market-feed = { path = "../vyapaar-market/crates/vyapaar-market-feed" }
+vyapaar-market-store = { path = "../vyapaar-market/crates/vyapaar-market-store" }
+
 # Serialization & schema generation.
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["float_roundtrip"] }
