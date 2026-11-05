@@ -75,6 +75,8 @@ pub struct Bar {
 }
 
 impl Bar {
+    /// Lift a core `Bar` into its Python wrapper (public Rust API).
+    #[allow(dead_code)]
     pub(crate) fn from_core(inner: vyapaar_core::Bar) -> Self {
         Self { inner }
     }
@@ -165,6 +167,8 @@ pub struct Tick {
 }
 
 impl Tick {
+    /// Lift a core `Tick` into its Python wrapper (public Rust API).
+    #[allow(dead_code)]
     pub(crate) fn from_core(inner: vyapaar_core::Tick) -> Self {
         Self { inner }
     }
@@ -202,6 +206,7 @@ impl Tick {
     }
 
     #[staticmethod]
+    #[allow(clippy::too_many_arguments)]
     #[pyo3(signature = (instrument, bid, ask, bid_qty, ask_qty, last_price=None, exchange_ts="", receive_ts=""))]
     fn quote(
         instrument: &Bound<'_, InstrumentId>,

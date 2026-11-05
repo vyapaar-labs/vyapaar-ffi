@@ -36,10 +36,9 @@ use pyo3::exceptions::PyException;
 use pyo3::prelude::*;
 use pyo3::types::PyModule;
 
-/// Raised when the synchronous `vyapaar-risk` gate refuses an order.
+// Custom exceptions (raised across the FFI boundary). Registered on the module
+// inside `init_module` below.
 create_exception!(_vyapaar, RiskRefused, PyException);
-
-/// Raised when a value cannot be converted between Python and the Rust kernel.
 create_exception!(_vyapaar, ConversionError, PyException);
 
 /// Register every class and function onto a Python module.

@@ -123,7 +123,9 @@ fn set_print(print: &mut Option<PrintTarget>, target: PrintTarget) -> Result<(),
     Ok(())
 }
 
-fn write_artifacts(schema_out: &PathBuf, pyi_out: &PathBuf) -> ExitCode {
+use std::path::Path;
+
+fn write_artifacts(schema_out: &Path, pyi_out: &Path) -> ExitCode {
     match write_all(schema_out, pyi_out) {
         Ok(paths) => {
             for path in paths {

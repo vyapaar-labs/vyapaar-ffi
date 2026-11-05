@@ -32,7 +32,7 @@ fn same_code(code: &str, other: &Bound<'_, PyAny>) -> bool {
 /// values.
 pub(crate) fn price_from_any(value: &Bound<'_, PyAny>) -> PyResult<vyapaar_core::Price> {
     let d = pydecimal_to_decimal(value)?;
-    vyapaar_core::Price::try_new(d).map_err(|e| conversion_err(e))
+    vyapaar_core::Price::try_new(d).map_err(conversion_err)
 }
 
 /// Parse a Python `decimal.Decimal` (or any `__str__` object) into a validated
@@ -40,7 +40,7 @@ pub(crate) fn price_from_any(value: &Bound<'_, PyAny>) -> PyResult<vyapaar_core:
 /// negative values.
 pub(crate) fn quantity_from_any(value: &Bound<'_, PyAny>) -> PyResult<vyapaar_core::Quantity> {
     let d = pydecimal_to_decimal(value)?;
-    vyapaar_core::Quantity::try_new(d).map_err(|e| conversion_err(e))
+    vyapaar_core::Quantity::try_new(d).map_err(conversion_err)
 }
 
 /// Map a core `OrderStatus` to its uppercase snake_code wire form
@@ -70,7 +70,7 @@ impl Price {
     #[pyo3(signature = (value))]
     fn new(value: &Bound<'_, PyAny>) -> PyResult<Self> {
         let d = pydecimal_to_decimal(value)?;
-        let inner = vyapaar_core::Price::try_new(d).map_err(|e| conversion_err(e))?;
+        let inner = vyapaar_core::Price::try_new(d).map_err(conversion_err)?;
         Ok(Self { inner })
     }
 
@@ -120,7 +120,7 @@ impl Quantity {
     #[pyo3(signature = (value))]
     fn new(value: &Bound<'_, PyAny>) -> PyResult<Self> {
         let d = pydecimal_to_decimal(value)?;
-        let inner = vyapaar_core::Quantity::try_new(d).map_err(|e| conversion_err(e))?;
+        let inner = vyapaar_core::Quantity::try_new(d).map_err(conversion_err)?;
         Ok(Self { inner })
     }
 
@@ -167,7 +167,7 @@ pub struct Currency {
 impl Currency {
     #[new]
     fn new(code: &str) -> PyResult<Self> {
-        let inner = vyapaar_core::Currency::from_code(code).map_err(|e| conversion_err(e))?;
+        let inner = vyapaar_core::Currency::from_code(code).map_err(conversion_err)?;
         Ok(Self { inner })
     }
 
@@ -201,7 +201,7 @@ pub struct Exchange {
 impl Exchange {
     #[new]
     fn new(code: &str) -> PyResult<Self> {
-        let inner = vyapaar_core::Exchange::from_str(code).map_err(|e| conversion_err(e))?;
+        let inner = vyapaar_core::Exchange::from_str(code).map_err(conversion_err)?;
         Ok(Self { inner })
     }
 
@@ -246,7 +246,7 @@ impl InstrumentId {
         token: Option<String>,
         isin: Option<String>,
     ) -> PyResult<Self> {
-        let ex = vyapaar_core::Exchange::from_str(exchange).map_err(|e| conversion_err(e))?;
+        let ex = vyapaar_core::Exchange::from_str(exchange).map_err(conversion_err)?;
         let mut inner = vyapaar_core::InstrumentId::new(ex, symbol);
         if let Some(token) = token {
             inner = inner.with_token(token);
@@ -288,7 +288,7 @@ impl InstrumentId {
                 "invalid InstrumentId {s:?}: expected \"EXCHANGE:SYMBOL\""
             ))
         })?;
-        let ex = vyapaar_core::Exchange::from_str(exchange).map_err(|e| conversion_err(e))?;
+        let ex = vyapaar_core::Exchange::from_str(exchange).map_err(conversion_err)?;
         Ok(InstrumentId {
             inner: vyapaar_core::InstrumentId::new(ex, symbol),
         })

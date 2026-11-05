@@ -24,6 +24,9 @@ pub struct Decision {
 }
 
 impl Decision {
+    /// Lift a core `Decision` into its Python wrapper (public Rust API; the
+    /// Python SDK primarily enters through [`Decision::from_json`]).
+    #[allow(dead_code)]
     pub(crate) fn from_core(inner: vyapaar_core::Decision) -> Self {
         Self { inner }
     }
@@ -38,7 +41,7 @@ impl Decision {
     /// quantity, empty symbol).
     #[staticmethod]
     fn from_json(s: &str) -> PyResult<Decision> {
-        let inner = vyapaar_core::Decision::from_json_str(s).map_err(|e| conversion_err(e))?;
+        let inner = vyapaar_core::Decision::from_json_str(s).map_err(conversion_err)?;
         Ok(Decision { inner })
     }
 

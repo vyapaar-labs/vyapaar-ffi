@@ -1,0 +1,5552 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "definitions": {
+    "Bar": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "Exchange": {
+          "description": "Supported exchanges in the Indian market.\n\nThis is the canonical [`Exchange`] vocabulary: downstream bounded contexts (`vyapaar-ledger`, `vyapaar-market`, `vyapaar-exec`) must never redefine their own exchange enums, only re-use this one.",
+          "oneOf": [
+            {
+              "description": "National Stock Exchange of India",
+              "enum": [
+                "NSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Bombay Stock Exchange",
+              "enum": [
+                "BSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "NSE Futures & Options segment (derivatives)",
+              "enum": [
+                "NFO"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Multi Commodity Exchange of India",
+              "enum": [
+                "MCX"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Currency Derivatives Segment",
+              "enum": [
+                "CDS"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "InstrumentId": {
+          "description": "Canonical instrument identifier across all feeds and brokers.\n\nOrdered by `(exchange, symbol, token, isin)` so it can key a `BTreeMap` and sort a dataset deterministically.",
+          "properties": {
+            "exchange": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Exchange"
+                }
+              ],
+              "description": "Exchange venue"
+            },
+            "isin": {
+              "description": "International Securities Identification Number (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "symbol": {
+              "description": "Trading symbol (e.g., \"RELIANCE\", \"TCS\", \"INFY\")",
+              "type": "string"
+            },
+            "token": {
+              "description": "Broker-assigned instrument token (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "exchange",
+            "symbol"
+          ],
+          "type": "object"
+        }
+      },
+      "description": "Standard OHLCV bar / candle.",
+      "properties": {
+        "close": {
+          "description": "Bar closing price",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "high": {
+          "description": "Bar high price",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "instrument": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/InstrumentId"
+            }
+          ],
+          "description": "Canonical instrument ID"
+        },
+        "low": {
+          "description": "Bar low price",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "open": {
+          "description": "Bar opening price",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "timestamp": {
+          "description": "Bar start or end timestamp (UTC)",
+          "format": "date-time",
+          "type": "string"
+        },
+        "volume": {
+          "description": "Total volume during bar interval",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "close",
+        "high",
+        "instrument",
+        "low",
+        "open",
+        "timestamp",
+        "volume"
+      ],
+      "title": "Bar",
+      "type": "object"
+    },
+    "CancelRequest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "Exchange": {
+          "description": "Supported exchanges in the Indian market.\n\nThis is the canonical [`Exchange`] vocabulary: downstream bounded contexts (`vyapaar-ledger`, `vyapaar-market`, `vyapaar-exec`) must never redefine their own exchange enums, only re-use this one.",
+          "oneOf": [
+            {
+              "description": "National Stock Exchange of India",
+              "enum": [
+                "NSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Bombay Stock Exchange",
+              "enum": [
+                "BSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "NSE Futures & Options segment (derivatives)",
+              "enum": [
+                "NFO"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Multi Commodity Exchange of India",
+              "enum": [
+                "MCX"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Currency Derivatives Segment",
+              "enum": [
+                "CDS"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "InstrumentId": {
+          "description": "Canonical instrument identifier across all feeds and brokers.\n\nOrdered by `(exchange, symbol, token, isin)` so it can key a `BTreeMap` and sort a dataset deterministically.",
+          "properties": {
+            "exchange": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Exchange"
+                }
+              ],
+              "description": "Exchange venue"
+            },
+            "isin": {
+              "description": "International Securities Identification Number (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "symbol": {
+              "description": "Trading symbol (e.g., \"RELIANCE\", \"TCS\", \"INFY\")",
+              "type": "string"
+            },
+            "token": {
+              "description": "Broker-assigned instrument token (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "exchange",
+            "symbol"
+          ],
+          "type": "object"
+        }
+      },
+      "description": "Cancel request for an existing order.",
+      "properties": {
+        "algo_id": {
+          "description": "Algo ID to cancel (if None, cancel all algos for this instrument)",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "client_id": {
+          "description": "Optional client ID",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "client_order_id": {
+          "description": "Client order ID of the order to cancel",
+          "format": "uuid",
+          "type": "string"
+        },
+        "instrument": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/InstrumentId"
+            }
+          ],
+          "description": "Instrument to cancel"
+        }
+      },
+      "required": [
+        "client_order_id",
+        "instrument"
+      ],
+      "title": "CancelRequest",
+      "type": "object"
+    },
+    "Decision": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "Exchange": {
+          "description": "Supported exchanges in the Indian market.\n\nThis is the canonical [`Exchange`] vocabulary: downstream bounded contexts (`vyapaar-ledger`, `vyapaar-market`, `vyapaar-exec`) must never redefine their own exchange enums, only re-use this one.",
+          "oneOf": [
+            {
+              "description": "National Stock Exchange of India",
+              "enum": [
+                "NSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Bombay Stock Exchange",
+              "enum": [
+                "BSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "NSE Futures & Options segment (derivatives)",
+              "enum": [
+                "NFO"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Multi Commodity Exchange of India",
+              "enum": [
+                "MCX"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Currency Derivatives Segment",
+              "enum": [
+                "CDS"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "InstrumentId": {
+          "description": "Canonical instrument identifier across all feeds and brokers.\n\nOrdered by `(exchange, symbol, token, isin)` so it can key a `BTreeMap` and sort a dataset deterministically.",
+          "properties": {
+            "exchange": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Exchange"
+                }
+              ],
+              "description": "Exchange venue"
+            },
+            "isin": {
+              "description": "International Securities Identification Number (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "symbol": {
+              "description": "Trading symbol (e.g., \"RELIANCE\", \"TCS\", \"INFY\")",
+              "type": "string"
+            },
+            "token": {
+              "description": "Broker-assigned instrument token (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "exchange",
+            "symbol"
+          ],
+          "type": "object"
+        },
+        "OrderSide": {
+          "description": "Order side.",
+          "oneOf": [
+            {
+              "description": "Buy order",
+              "enum": [
+                "BUY"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Sell order",
+              "enum": [
+                "SELL"
+              ],
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "description": "Closed enum representing all permissible strategy decisions.\n\nNOTE: Uses `deny_unknown_fields` to prevent LLMs from injecting hallucinations or extra unauthorized parameters. This is the closed decision grammar",
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "description": "Place a new order (buy or sell).\n\nSEBI Retail Algo Circular mandates a non-empty `algo_id`.",
+          "properties": {
+            "action": {
+              "enum": [
+                "place_order"
+              ],
+              "type": "string"
+            },
+            "algo_id": {
+              "description": "Mandatory algo ID for SEBI audit trail",
+              "type": "string"
+            },
+            "price_limit": {
+              "description": "Limit price ceiling (optional; if None, market order requested)",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "qty": {
+              "description": "Desired quantity",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "rationale": {
+              "description": "Optional reasoning from the model",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "side": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/OrderSide"
+                }
+              ],
+              "description": "Order side"
+            },
+            "symbol": {
+              "description": "Symbol to trade (e.g. \"RELIANCE\")",
+              "type": "string"
+            }
+          },
+          "required": [
+            "action",
+            "algo_id",
+            "qty",
+            "side",
+            "symbol"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Modify an existing order's quantity or price.",
+          "properties": {
+            "action": {
+              "enum": [
+                "modify_order"
+              ],
+              "type": "string"
+            },
+            "algo_id": {
+              "description": "Mandatory algo ID for SEBI audit trail",
+              "type": "string"
+            },
+            "instrument": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/InstrumentId"
+                }
+              ],
+              "description": "Instrument to modify"
+            },
+            "new_price": {
+              "description": "New limit price if applicable (None leaves price unchanged)",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "new_qty": {
+              "description": "New desired quantity (None leaves quantity unchanged)",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "rationale": {
+              "description": "Optional reasoning from the model",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "action",
+            "algo_id",
+            "instrument"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Cancel an existing order.",
+          "properties": {
+            "action": {
+              "enum": [
+                "cancel_order"
+              ],
+              "type": "string"
+            },
+            "algo_id": {
+              "description": "Algo ID to cancel (if None, cancel all algos for this instrument)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "instrument": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/InstrumentId"
+                }
+              ],
+              "description": "Instrument to cancel"
+            },
+            "rationale": {
+              "description": "Optional reasoning from the model",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "action",
+            "instrument"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Emergency cancel-all decision",
+          "properties": {
+            "action": {
+              "enum": [
+                "cancel_all"
+              ],
+              "type": "string"
+            },
+            "algo_id": {
+              "description": "Algo ID to cancel (if None, cancel all algos)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "reason": {
+              "description": "Explanation",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "action"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "description": "Hold decision (no market action)",
+          "properties": {
+            "action": {
+              "enum": [
+                "hold"
+              ],
+              "type": "string"
+            },
+            "reason": {
+              "description": "Explanation for holding",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "action"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Decision"
+    },
+    "DepthLevel": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "description": "Level 2 market depth entry.",
+      "properties": {
+        "orders_count": {
+          "description": "Number of open orders at this price (if provided by broker)",
+          "format": "uint32",
+          "minimum": 0.0,
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "price": {
+          "description": "Depth price level",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "quantity": {
+          "description": "Total quantity at this price",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "price",
+        "quantity"
+      ],
+      "title": "DepthLevel",
+      "type": "object"
+    },
+    "DomainEvent": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "Currency": {
+          "description": "Currency enum.\n\nThe minor-unit table lives here, in the kernel, so every consumer (Rust crates, the Python SDK through `vyapaar._vyapaar.currency_minor_units`) reads one table instead of keeping its own copy.",
+          "oneOf": [
+            {
+              "description": "Indian Rupee",
+              "enum": [
+                "Inr"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "United States Dollar",
+              "enum": [
+                "Usd"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Euro",
+              "enum": [
+                "Eur"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "British Pound",
+              "enum": [
+                "Gbp"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "Exchange": {
+          "description": "Supported exchanges in the Indian market.\n\nThis is the canonical [`Exchange`] vocabulary: downstream bounded contexts (`vyapaar-ledger`, `vyapaar-market`, `vyapaar-exec`) must never redefine their own exchange enums, only re-use this one.",
+          "oneOf": [
+            {
+              "description": "National Stock Exchange of India",
+              "enum": [
+                "NSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Bombay Stock Exchange",
+              "enum": [
+                "BSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "NSE Futures & Options segment (derivatives)",
+              "enum": [
+                "NFO"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Multi Commodity Exchange of India",
+              "enum": [
+                "MCX"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Currency Derivatives Segment",
+              "enum": [
+                "CDS"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "FeeBreakdown": {
+          "description": "Itemized Indian equity/F&O transaction cost breakdown for a single fill.\n\nEach component is computed by `vyapaar-market-finance::india::costs`'s statutory calculators; this type is just the shared wire shape they fill in.",
+          "properties": {
+            "brokerage": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Broker commission."
+            },
+            "exchange_charges": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Exchange transaction charges."
+            },
+            "gst": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Goods and Services Tax (on brokerage + exchange charges)."
+            },
+            "sebi_charges": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "SEBI turnover fees."
+            },
+            "stamp_duty": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Stamp duty."
+            },
+            "stt": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Securities Transaction Tax."
+            }
+          },
+          "required": [
+            "brokerage",
+            "exchange_charges",
+            "gst",
+            "sebi_charges",
+            "stamp_duty",
+            "stt"
+          ],
+          "type": "object"
+        },
+        "FillReport": {
+          "description": "Execution fill report.",
+          "properties": {
+            "account_id": {
+              "description": "Optional account ID (defaults to \"default\" if not provided)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "algo_id": {
+              "description": "Associated algorithm ID",
+              "type": "string"
+            },
+            "client_id": {
+              "description": "Optional client ID",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "client_order_id": {
+              "description": "Associated client correlation ID",
+              "format": "uuid",
+              "type": "string"
+            },
+            "correlation_id": {
+              "description": "Distributed trace correlation ID",
+              "format": "uuid",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "fee": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "default": {
+                "amount": "0",
+                "currency": "Inr"
+              },
+              "description": "Total transaction cost charged on this fill (brokerage, statutory levies, and exchange charges combined), in the fill's currency.\n\nDefaults to zero for callers that don't yet have cost data (e.g. a simulated/paper fill). The statutory calculation itself lives in `vyapaar-market` (`vyapaar-market-finance::india::costs`); this crate only owns the contract."
+            },
+            "fee_breakdown": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/FeeBreakdown"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Itemized breakdown of [`FillReport::fee`], when the caller has it."
+            },
+            "fill_id": {
+              "description": "Unique fill identifier",
+              "type": "string"
+            },
+            "instrument": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/InstrumentId"
+                }
+              ],
+              "description": "Traded instrument"
+            },
+            "order_id": {
+              "description": "Associated broker order ID",
+              "type": "string"
+            },
+            "price": {
+              "description": "Exact execution price",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "quantity": {
+              "description": "Executed quantity",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "side": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/OrderSide"
+                }
+              ],
+              "description": "Order side"
+            },
+            "timestamp": {
+              "description": "Execution timestamp",
+              "format": "date-time",
+              "type": "string"
+            },
+            "trace_context": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/TraceContext"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional W3C distributed trace context"
+            }
+          },
+          "required": [
+            "algo_id",
+            "client_order_id",
+            "fill_id",
+            "instrument",
+            "order_id",
+            "price",
+            "quantity",
+            "side",
+            "timestamp"
+          ],
+          "type": "object"
+        },
+        "InstrumentId": {
+          "description": "Canonical instrument identifier across all feeds and brokers.\n\nOrdered by `(exchange, symbol, token, isin)` so it can key a `BTreeMap` and sort a dataset deterministically.",
+          "properties": {
+            "exchange": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Exchange"
+                }
+              ],
+              "description": "Exchange venue"
+            },
+            "isin": {
+              "description": "International Securities Identification Number (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "symbol": {
+              "description": "Trading symbol (e.g., \"RELIANCE\", \"TCS\", \"INFY\")",
+              "type": "string"
+            },
+            "token": {
+              "description": "Broker-assigned instrument token (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "exchange",
+            "symbol"
+          ],
+          "type": "object"
+        },
+        "Money": {
+          "description": "Explicit monetary amount with currency.",
+          "properties": {
+            "amount": {
+              "description": "Exact amount",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "currency": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Currency"
+                }
+              ],
+              "description": "Currency"
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "type": "object"
+        },
+        "OrderSide": {
+          "description": "Order side.",
+          "oneOf": [
+            {
+              "description": "Buy order",
+              "enum": [
+                "BUY"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Sell order",
+              "enum": [
+                "SELL"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "PositionSide": {
+          "description": "Direction of a held or closed position.\n\nDistinct from [`crate::order::OrderSide`], which is the side of a single order or fill, not the resulting net position.",
+          "oneOf": [
+            {
+              "description": "Net long.",
+              "enum": [
+                "LONG"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Net short.",
+              "enum": [
+                "SHORT"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "PositionSizingRequest": {
+          "description": "Request to compute dynamic position sizing for an instrument trade intent.",
+          "properties": {
+            "account_equity": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Available account equity."
+            },
+            "current_volatility": {
+              "description": "Current instrument volatility (ATR or price standard deviation), if computed.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "entry_price": {
+              "description": "Expected entry price.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "instrument": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/InstrumentId"
+                }
+              ],
+              "description": "Target instrument to size."
+            },
+            "risk_budget": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/RiskBudget"
+                }
+              ],
+              "description": "Risk budget parameters and limits."
+            },
+            "side": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/PositionSide"
+                }
+              ],
+              "description": "Side of the planned trade."
+            },
+            "sizing_method": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/SizingMethod"
+                }
+              ],
+              "description": "Dynamic position sizing model."
+            },
+            "stop_loss": {
+              "description": "Stop loss price, if defined.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "account_equity",
+            "entry_price",
+            "instrument",
+            "risk_budget",
+            "side",
+            "sizing_method"
+          ],
+          "type": "object"
+        },
+        "PositionSizingResult": {
+          "description": "Output of dynamic position sizing.",
+          "properties": {
+            "allocated_notional": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Allocated cash notional (`entry_price * quantity`)."
+            },
+            "capped_by_limit": {
+              "description": "Whether the calculated quantity was reduced by any limit or cap.",
+              "type": "boolean"
+            },
+            "instrument": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/InstrumentId"
+                }
+              ],
+              "description": "Target instrument."
+            },
+            "quantity": {
+              "description": "Computed executable quantity, strictly rounded down to lot size multiples.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "reason": {
+              "description": "Human-readable explanation or capping detail, if any.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "risk_at_stake": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Total capital at risk (`|entry_price - stop_loss| * quantity`)."
+            },
+            "target_weight": {
+              "description": "Target portfolio weight (`allocated_notional / account_equity`).",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "allocated_notional",
+            "capped_by_limit",
+            "instrument",
+            "quantity",
+            "risk_at_stake"
+          ],
+          "type": "object"
+        },
+        "RiskBudget": {
+          "description": "Risk parameters and sizing constraints for a trade or portfolio.",
+          "properties": {
+            "equity": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Total account equity available for risk allocation."
+            },
+            "freeze_limit_qty": {
+              "description": "Scrip freeze limit (exchange-mandated single order quantity ceiling), if configured.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "max_portfolio_risk_pct": {
+              "description": "Maximum portfolio aggregate risk percentage, if configured.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "max_position_notional": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Maximum position notional cash cap, if configured."
+            },
+            "max_position_qty": {
+              "description": "Maximum position share or contract quantity cap, if configured.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "min_lot_size": {
+              "description": "Instrument minimum lot size (e.g. 1 for equities, 25/50 for index derivatives).",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "risk_pct": {
+              "description": "Default risk fraction per trade (e.g. 0.01 for 1%).",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "equity",
+            "min_lot_size",
+            "risk_pct"
+          ],
+          "type": "object"
+        },
+        "SizingMethod": {
+          "description": "Permissible dynamic position sizing models.",
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "description": "Risk a fixed fraction/percentage of account equity per trade (e.g. 0.01 for 1%).",
+              "properties": {
+                "risk_pct": {
+                  "description": "Risk fraction of equity (e.g. 0.01 represents 1%).",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "fixed_fractional"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "risk_pct",
+                "type"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "Size inversely proportional to instrument volatility (ATR or standard deviation).",
+              "properties": {
+                "lookback_bars": {
+                  "description": "Lookback window in bars used for volatility computation.",
+                  "format": "uint",
+                  "minimum": 0.0,
+                  "type": "integer"
+                },
+                "target_annual_vol": {
+                  "description": "Target annualized volatility (e.g. 0.15 for 15%).",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "volatility_target"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "lookback_bars",
+                "target_annual_vol",
+                "type"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "Optimal growth sizing with damping fraction (e.g. half-Kelly).",
+              "properties": {
+                "fraction": {
+                  "description": "Kelly multiplier fraction (e.g. 0.5 for half-Kelly).",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "payoff_ratio": {
+                  "description": "Payoff ratio (average win / average loss).",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "kelly_criterion"
+                  ],
+                  "type": "string"
+                },
+                "win_rate": {
+                  "description": "Expected historical win rate in `[0, 1]`.",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "fraction",
+                "payoff_ratio",
+                "type",
+                "win_rate"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "Allocate risk budget equally across all active signal candidates.",
+              "properties": {
+                "type": {
+                  "enum": [
+                    "equal_risk_contribution"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "Allocate a fixed cash notional dynamically converted to lot-rounded quantity.",
+              "properties": {
+                "notional": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/Money"
+                    }
+                  ],
+                  "description": "Fixed cash amount to allocate."
+                },
+                "type": {
+                  "enum": [
+                    "fixed_notional"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "notional",
+                "type"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "TraceContext": {
+          "description": "Zero-dependency W3C trace context carrier.\n\nImplements the W3C Trace Context Level 1 specification (`traceparent` header). Enables end-to-end distributed tracing across microservices, asynchronous actor hops, audit logs, and external bridges with zero external crate dependencies.",
+          "properties": {
+            "span_id": {
+              "description": "8-byte parent or current span identifier.",
+              "items": {
+                "format": "uint8",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              "maxItems": 8,
+              "minItems": 8,
+              "type": "array"
+            },
+            "trace_flags": {
+              "description": "8-bit trace options flags (bit 0 = recorded/sampled).",
+              "format": "uint8",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "trace_id": {
+              "description": "16-byte distributed trace identifier.",
+              "items": {
+                "format": "uint8",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              "maxItems": 16,
+              "minItems": 16,
+              "type": "array"
+            }
+          },
+          "required": [
+            "span_id",
+            "trace_flags",
+            "trace_id"
+          ],
+          "type": "object"
+        }
+      },
+      "description": "Tactical DDD aggregate domain events representing authoritative platform state transitions.\n\nImmutable event stream payloads designed for distributed audit logging, event-sourced ledger reconstruction, and asynchronous cross-bounded-context bus delivery.",
+      "oneOf": [
+        {
+          "description": "Client order dispatched with registered `algo_id`, side, quantity, limit price, and timestamp.",
+          "properties": {
+            "algo_id": {
+              "description": "Registered algorithmic strategy identifier.",
+              "type": "string"
+            },
+            "client_order_id": {
+              "description": "Client correlation identifier.",
+              "format": "uuid",
+              "type": "string"
+            },
+            "instrument": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/InstrumentId"
+                }
+              ],
+              "description": "Target instrument traded."
+            },
+            "order_id": {
+              "description": "Platform order identifier.",
+              "type": "string"
+            },
+            "price": {
+              "description": "Limit price, if limit or stop-limit.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "quantity": {
+              "description": "Order quantity.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "side": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/OrderSide"
+                }
+              ],
+              "description": "Direction of order."
+            },
+            "timestamp": {
+              "description": "Event creation timestamp.",
+              "format": "date-time",
+              "type": "string"
+            },
+            "trace_context": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/TraceContext"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Distributed trace context."
+            },
+            "type": {
+              "enum": [
+                "order_placed"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "algo_id",
+            "client_order_id",
+            "instrument",
+            "order_id",
+            "quantity",
+            "side",
+            "timestamp",
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "In-flight order price/quantity amendment with original and revised parameters.",
+          "properties": {
+            "algo_id": {
+              "description": "Registered algo ID.",
+              "type": "string"
+            },
+            "client_order_id": {
+              "description": "Client correlation identifier.",
+              "format": "uuid",
+              "type": "string"
+            },
+            "instrument": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/InstrumentId"
+                }
+              ],
+              "description": "Target instrument."
+            },
+            "new_price": {
+              "description": "Revised price.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "new_quantity": {
+              "description": "Revised quantity.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "order_id": {
+              "description": "Platform order identifier.",
+              "type": "string"
+            },
+            "previous_price": {
+              "description": "Pre-modification price.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "previous_quantity": {
+              "description": "Pre-modification quantity.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "timestamp": {
+              "description": "Event timestamp.",
+              "format": "date-time",
+              "type": "string"
+            },
+            "trace_context": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/TraceContext"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Distributed trace context."
+            },
+            "type": {
+              "enum": [
+                "order_modified"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "algo_id",
+            "client_order_id",
+            "instrument",
+            "new_quantity",
+            "order_id",
+            "previous_quantity",
+            "timestamp",
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Order withdrawal with optional cancellation source and reason.",
+          "properties": {
+            "algo_id": {
+              "description": "Associated algo identifier, if known.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "client_order_id": {
+              "description": "Client correlation identifier.",
+              "format": "uuid",
+              "type": "string"
+            },
+            "instrument": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/InstrumentId"
+                }
+              ],
+              "description": "Target instrument."
+            },
+            "order_id": {
+              "description": "Platform order identifier.",
+              "type": "string"
+            },
+            "reason": {
+              "description": "Detail or rationale for cancellation.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "source": {
+              "description": "Cancellation origin (e.g. user, rms, market_close).",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "timestamp": {
+              "description": "Event timestamp.",
+              "format": "date-time",
+              "type": "string"
+            },
+            "trace_context": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/TraceContext"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Distributed trace context."
+            },
+            "type": {
+              "enum": [
+                "order_cancelled"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "client_order_id",
+            "instrument",
+            "order_id",
+            "timestamp",
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Fill execution details referencing matched [`FillReport`].",
+          "properties": {
+            "fill": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/FillReport"
+                }
+              ],
+              "description": "Authoritative fill execution report."
+            },
+            "timestamp": {
+              "description": "Fill event timestamp.",
+              "format": "date-time",
+              "type": "string"
+            },
+            "trace_context": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/TraceContext"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Distributed trace context."
+            },
+            "type": {
+              "enum": [
+                "order_filled"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "fill",
+            "timestamp",
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Pre-trade risk gate denial event carrying rule identifier, attempted value, and threshold limit.",
+          "properties": {
+            "attempted_value": {
+              "description": "Numeric value that was attempted (e.g. order notional, quantity).",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "instrument": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/InstrumentId"
+                }
+              ],
+              "description": "Target instrument evaluated."
+            },
+            "message": {
+              "description": "Human-readable explanation.",
+              "type": "string"
+            },
+            "order_id": {
+              "description": "Platform order identifier, if assigned.",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "rule_id": {
+              "description": "Identifier of the risk rule that triggered rejection.",
+              "type": "string"
+            },
+            "threshold_limit": {
+              "description": "Maximum or minimum threshold allowed by the risk rule.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "timestamp": {
+              "description": "Event timestamp.",
+              "format": "date-time",
+              "type": "string"
+            },
+            "trace_context": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/TraceContext"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Distributed trace context."
+            },
+            "type": {
+              "enum": [
+                "risk_breached"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "attempted_value",
+            "instrument",
+            "message",
+            "rule_id",
+            "threshold_limit",
+            "timestamp",
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Emergency square-off or MIS auto-liquidation notification.",
+          "properties": {
+            "account_id": {
+              "description": "Target trading account.",
+              "type": "string"
+            },
+            "instrument": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/InstrumentId"
+                }
+              ],
+              "description": "Liquidated instrument."
+            },
+            "price": {
+              "description": "Average exit price.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "quantity": {
+              "description": "Liquidated quantity.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "reason": {
+              "description": "Reason for auto-liquidation (e.g. RMS intraday auto-square-off).",
+              "type": "string"
+            },
+            "side": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/PositionSide"
+                }
+              ],
+              "description": "Direction of liquidation trade."
+            },
+            "timestamp": {
+              "description": "Event timestamp.",
+              "format": "date-time",
+              "type": "string"
+            },
+            "trace_context": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/TraceContext"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Distributed trace context."
+            },
+            "type": {
+              "enum": [
+                "position_liquidated"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "account_id",
+            "instrument",
+            "price",
+            "quantity",
+            "reason",
+            "side",
+            "timestamp",
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Intraday margin shortfall alert with required maintenance equity.",
+          "properties": {
+            "account_id": {
+              "description": "Account identifier.",
+              "type": "string"
+            },
+            "current_equity": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Current available account equity."
+            },
+            "required_maintenance_equity": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Total margin equity required to maintain open positions."
+            },
+            "shortfall": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Cash shortfall amount required to cure the call."
+            },
+            "timestamp": {
+              "description": "Event timestamp.",
+              "format": "date-time",
+              "type": "string"
+            },
+            "trace_context": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/TraceContext"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Distributed trace context."
+            },
+            "type": {
+              "enum": [
+                "margin_call_issued"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "account_id",
+            "current_equity",
+            "required_maintenance_equity",
+            "shortfall",
+            "timestamp",
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Sizing determination event capturing sizing model inputs, computed quantities, and capping rules.",
+          "properties": {
+            "request": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/PositionSizingRequest"
+                }
+              ],
+              "description": "Dynamic position sizing request."
+            },
+            "result": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/PositionSizingResult"
+                }
+              ],
+              "description": "Sizing outcome and constraints."
+            },
+            "timestamp": {
+              "description": "Event timestamp.",
+              "format": "date-time",
+              "type": "string"
+            },
+            "trace_context": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/TraceContext"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Distributed trace context."
+            },
+            "type": {
+              "enum": [
+                "sizing_calculated"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "request",
+            "result",
+            "timestamp",
+            "type"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "DomainEvent"
+    },
+    "FeeBreakdown": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "Currency": {
+          "description": "Currency enum.\n\nThe minor-unit table lives here, in the kernel, so every consumer (Rust crates, the Python SDK through `vyapaar._vyapaar.currency_minor_units`) reads one table instead of keeping its own copy.",
+          "oneOf": [
+            {
+              "description": "Indian Rupee",
+              "enum": [
+                "Inr"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "United States Dollar",
+              "enum": [
+                "Usd"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Euro",
+              "enum": [
+                "Eur"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "British Pound",
+              "enum": [
+                "Gbp"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "Money": {
+          "description": "Explicit monetary amount with currency.",
+          "properties": {
+            "amount": {
+              "description": "Exact amount",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "currency": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Currency"
+                }
+              ],
+              "description": "Currency"
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "type": "object"
+        }
+      },
+      "description": "Itemized Indian equity/F&O transaction cost breakdown for a single fill.\n\nEach component is computed by `vyapaar-market-finance::india::costs`'s statutory calculators; this type is just the shared wire shape they fill in.",
+      "properties": {
+        "brokerage": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Money"
+            }
+          ],
+          "description": "Broker commission."
+        },
+        "exchange_charges": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Money"
+            }
+          ],
+          "description": "Exchange transaction charges."
+        },
+        "gst": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Money"
+            }
+          ],
+          "description": "Goods and Services Tax (on brokerage + exchange charges)."
+        },
+        "sebi_charges": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Money"
+            }
+          ],
+          "description": "SEBI turnover fees."
+        },
+        "stamp_duty": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Money"
+            }
+          ],
+          "description": "Stamp duty."
+        },
+        "stt": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Money"
+            }
+          ],
+          "description": "Securities Transaction Tax."
+        }
+      },
+      "required": [
+        "brokerage",
+        "exchange_charges",
+        "gst",
+        "sebi_charges",
+        "stamp_duty",
+        "stt"
+      ],
+      "title": "FeeBreakdown",
+      "type": "object"
+    },
+    "FillReport": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "Currency": {
+          "description": "Currency enum.\n\nThe minor-unit table lives here, in the kernel, so every consumer (Rust crates, the Python SDK through `vyapaar._vyapaar.currency_minor_units`) reads one table instead of keeping its own copy.",
+          "oneOf": [
+            {
+              "description": "Indian Rupee",
+              "enum": [
+                "Inr"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "United States Dollar",
+              "enum": [
+                "Usd"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Euro",
+              "enum": [
+                "Eur"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "British Pound",
+              "enum": [
+                "Gbp"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "Exchange": {
+          "description": "Supported exchanges in the Indian market.\n\nThis is the canonical [`Exchange`] vocabulary: downstream bounded contexts (`vyapaar-ledger`, `vyapaar-market`, `vyapaar-exec`) must never redefine their own exchange enums, only re-use this one.",
+          "oneOf": [
+            {
+              "description": "National Stock Exchange of India",
+              "enum": [
+                "NSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Bombay Stock Exchange",
+              "enum": [
+                "BSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "NSE Futures & Options segment (derivatives)",
+              "enum": [
+                "NFO"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Multi Commodity Exchange of India",
+              "enum": [
+                "MCX"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Currency Derivatives Segment",
+              "enum": [
+                "CDS"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "FeeBreakdown": {
+          "description": "Itemized Indian equity/F&O transaction cost breakdown for a single fill.\n\nEach component is computed by `vyapaar-market-finance::india::costs`'s statutory calculators; this type is just the shared wire shape they fill in.",
+          "properties": {
+            "brokerage": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Broker commission."
+            },
+            "exchange_charges": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Exchange transaction charges."
+            },
+            "gst": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Goods and Services Tax (on brokerage + exchange charges)."
+            },
+            "sebi_charges": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "SEBI turnover fees."
+            },
+            "stamp_duty": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Stamp duty."
+            },
+            "stt": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Securities Transaction Tax."
+            }
+          },
+          "required": [
+            "brokerage",
+            "exchange_charges",
+            "gst",
+            "sebi_charges",
+            "stamp_duty",
+            "stt"
+          ],
+          "type": "object"
+        },
+        "InstrumentId": {
+          "description": "Canonical instrument identifier across all feeds and brokers.\n\nOrdered by `(exchange, symbol, token, isin)` so it can key a `BTreeMap` and sort a dataset deterministically.",
+          "properties": {
+            "exchange": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Exchange"
+                }
+              ],
+              "description": "Exchange venue"
+            },
+            "isin": {
+              "description": "International Securities Identification Number (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "symbol": {
+              "description": "Trading symbol (e.g., \"RELIANCE\", \"TCS\", \"INFY\")",
+              "type": "string"
+            },
+            "token": {
+              "description": "Broker-assigned instrument token (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "exchange",
+            "symbol"
+          ],
+          "type": "object"
+        },
+        "Money": {
+          "description": "Explicit monetary amount with currency.",
+          "properties": {
+            "amount": {
+              "description": "Exact amount",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "currency": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Currency"
+                }
+              ],
+              "description": "Currency"
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "type": "object"
+        },
+        "OrderSide": {
+          "description": "Order side.",
+          "oneOf": [
+            {
+              "description": "Buy order",
+              "enum": [
+                "BUY"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Sell order",
+              "enum": [
+                "SELL"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "TraceContext": {
+          "description": "Zero-dependency W3C trace context carrier.\n\nImplements the W3C Trace Context Level 1 specification (`traceparent` header). Enables end-to-end distributed tracing across microservices, asynchronous actor hops, audit logs, and external bridges with zero external crate dependencies.",
+          "properties": {
+            "span_id": {
+              "description": "8-byte parent or current span identifier.",
+              "items": {
+                "format": "uint8",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              "maxItems": 8,
+              "minItems": 8,
+              "type": "array"
+            },
+            "trace_flags": {
+              "description": "8-bit trace options flags (bit 0 = recorded/sampled).",
+              "format": "uint8",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "trace_id": {
+              "description": "16-byte distributed trace identifier.",
+              "items": {
+                "format": "uint8",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              "maxItems": 16,
+              "minItems": 16,
+              "type": "array"
+            }
+          },
+          "required": [
+            "span_id",
+            "trace_flags",
+            "trace_id"
+          ],
+          "type": "object"
+        }
+      },
+      "description": "Execution fill report.",
+      "properties": {
+        "account_id": {
+          "description": "Optional account ID (defaults to \"default\" if not provided)",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "algo_id": {
+          "description": "Associated algorithm ID",
+          "type": "string"
+        },
+        "client_id": {
+          "description": "Optional client ID",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "client_order_id": {
+          "description": "Associated client correlation ID",
+          "format": "uuid",
+          "type": "string"
+        },
+        "correlation_id": {
+          "description": "Distributed trace correlation ID",
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "fee": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Money"
+            }
+          ],
+          "default": {
+            "amount": "0",
+            "currency": "Inr"
+          },
+          "description": "Total transaction cost charged on this fill (brokerage, statutory levies, and exchange charges combined), in the fill's currency.\n\nDefaults to zero for callers that don't yet have cost data (e.g. a simulated/paper fill). The statutory calculation itself lives in `vyapaar-market` (`vyapaar-market-finance::india::costs`); this crate only owns the contract."
+        },
+        "fee_breakdown": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/FeeBreakdown"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Itemized breakdown of [`FillReport::fee`], when the caller has it."
+        },
+        "fill_id": {
+          "description": "Unique fill identifier",
+          "type": "string"
+        },
+        "instrument": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/InstrumentId"
+            }
+          ],
+          "description": "Traded instrument"
+        },
+        "order_id": {
+          "description": "Associated broker order ID",
+          "type": "string"
+        },
+        "price": {
+          "description": "Exact execution price",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "quantity": {
+          "description": "Executed quantity",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "side": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/OrderSide"
+            }
+          ],
+          "description": "Order side"
+        },
+        "timestamp": {
+          "description": "Execution timestamp",
+          "format": "date-time",
+          "type": "string"
+        },
+        "trace_context": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/TraceContext"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Optional W3C distributed trace context"
+        }
+      },
+      "required": [
+        "algo_id",
+        "client_order_id",
+        "fill_id",
+        "instrument",
+        "order_id",
+        "price",
+        "quantity",
+        "side",
+        "timestamp"
+      ],
+      "title": "FillReport",
+      "type": "object"
+    },
+    "Instrument": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "CountryCode": {
+          "description": "Supported sovereign countries / market jurisdictions.",
+          "oneOf": [
+            {
+              "description": "India (IN)",
+              "enum": [
+                "IN"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "United States of America (US)",
+              "enum": [
+                "US"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "United Kingdom (UK / GB)",
+              "enum": [
+                "UK"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Japan (JP)",
+              "enum": [
+                "JP"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "Currency": {
+          "description": "Currency enum.\n\nThe minor-unit table lives here, in the kernel, so every consumer (Rust crates, the Python SDK through `vyapaar._vyapaar.currency_minor_units`) reads one table instead of keeping its own copy.",
+          "oneOf": [
+            {
+              "description": "Indian Rupee",
+              "enum": [
+                "Inr"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "United States Dollar",
+              "enum": [
+                "Usd"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Euro",
+              "enum": [
+                "Eur"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "British Pound",
+              "enum": [
+                "Gbp"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "Exchange": {
+          "description": "Supported exchanges in the Indian market.\n\nThis is the canonical [`Exchange`] vocabulary: downstream bounded contexts (`vyapaar-ledger`, `vyapaar-market`, `vyapaar-exec`) must never redefine their own exchange enums, only re-use this one.",
+          "oneOf": [
+            {
+              "description": "National Stock Exchange of India",
+              "enum": [
+                "NSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Bombay Stock Exchange",
+              "enum": [
+                "BSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "NSE Futures & Options segment (derivatives)",
+              "enum": [
+                "NFO"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Multi Commodity Exchange of India",
+              "enum": [
+                "MCX"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Currency Derivatives Segment",
+              "enum": [
+                "CDS"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "InstrumentId": {
+          "description": "Canonical instrument identifier across all feeds and brokers.\n\nOrdered by `(exchange, symbol, token, isin)` so it can key a `BTreeMap` and sort a dataset deterministically.",
+          "properties": {
+            "exchange": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Exchange"
+                }
+              ],
+              "description": "Exchange venue"
+            },
+            "isin": {
+              "description": "International Securities Identification Number (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "symbol": {
+              "description": "Trading symbol (e.g., \"RELIANCE\", \"TCS\", \"INFY\")",
+              "type": "string"
+            },
+            "token": {
+              "description": "Broker-assigned instrument token (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "exchange",
+            "symbol"
+          ],
+          "type": "object"
+        },
+        "InstrumentKind": {
+          "description": "Broad instrument classification.",
+          "oneOf": [
+            {
+              "description": "Cash equity.",
+              "enum": [
+                "equity"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Futures contract.",
+              "enum": [
+                "future"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Options contract.",
+              "enum": [
+                "option"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Index (not directly tradable; underlying for derivatives).",
+              "enum": [
+                "index"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "OptionType": {
+          "description": "Option right.",
+          "oneOf": [
+            {
+              "description": "Call option.",
+              "enum": [
+                "call"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Put option.",
+              "enum": [
+                "put"
+              ],
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "description": "Full reference-data record / profile for a tradable instrument.",
+      "properties": {
+        "country": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/CountryCode"
+            }
+          ],
+          "default": "IN",
+          "description": "Country / market jurisdiction code (e.g. IN, US, UK, JP)."
+        },
+        "currency": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Currency"
+            }
+          ],
+          "default": "Inr",
+          "description": "Quoted / base currency for pricing and valuation."
+        },
+        "expiry": {
+          "description": "Expiry date, for futures and options.",
+          "format": "date-time",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/InstrumentId"
+            }
+          ],
+          "description": "Canonical lookup key."
+        },
+        "kind": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/InstrumentKind"
+            }
+          ],
+          "description": "Broad classification."
+        },
+        "lot_size": {
+          "description": "Exchange-mandated lot size.",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "option_type": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/OptionType"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Call or put, for options."
+        },
+        "strike": {
+          "description": "Strike price, for options.",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tick_size": {
+          "description": "Minimum price movement.",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "underlying": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/InstrumentId"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Underlying instrument, for derivatives."
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "lot_size",
+        "tick_size"
+      ],
+      "title": "Instrument",
+      "type": "object"
+    },
+    "InstrumentId": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "Exchange": {
+          "description": "Supported exchanges in the Indian market.\n\nThis is the canonical [`Exchange`] vocabulary: downstream bounded contexts (`vyapaar-ledger`, `vyapaar-market`, `vyapaar-exec`) must never redefine their own exchange enums, only re-use this one.",
+          "oneOf": [
+            {
+              "description": "National Stock Exchange of India",
+              "enum": [
+                "NSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Bombay Stock Exchange",
+              "enum": [
+                "BSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "NSE Futures & Options segment (derivatives)",
+              "enum": [
+                "NFO"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Multi Commodity Exchange of India",
+              "enum": [
+                "MCX"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Currency Derivatives Segment",
+              "enum": [
+                "CDS"
+              ],
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "description": "Canonical instrument identifier across all feeds and brokers.\n\nOrdered by `(exchange, symbol, token, isin)` so it can key a `BTreeMap` and sort a dataset deterministically.",
+      "properties": {
+        "exchange": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Exchange"
+            }
+          ],
+          "description": "Exchange venue"
+        },
+        "isin": {
+          "description": "International Securities Identification Number (optional)",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "symbol": {
+          "description": "Trading symbol (e.g., \"RELIANCE\", \"TCS\", \"INFY\")",
+          "type": "string"
+        },
+        "token": {
+          "description": "Broker-assigned instrument token (optional)",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "exchange",
+        "symbol"
+      ],
+      "title": "InstrumentId",
+      "type": "object"
+    },
+    "ModifyRequest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "Exchange": {
+          "description": "Supported exchanges in the Indian market.\n\nThis is the canonical [`Exchange`] vocabulary: downstream bounded contexts (`vyapaar-ledger`, `vyapaar-market`, `vyapaar-exec`) must never redefine their own exchange enums, only re-use this one.",
+          "oneOf": [
+            {
+              "description": "National Stock Exchange of India",
+              "enum": [
+                "NSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Bombay Stock Exchange",
+              "enum": [
+                "BSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "NSE Futures & Options segment (derivatives)",
+              "enum": [
+                "NFO"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Multi Commodity Exchange of India",
+              "enum": [
+                "MCX"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Currency Derivatives Segment",
+              "enum": [
+                "CDS"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "InstrumentId": {
+          "description": "Canonical instrument identifier across all feeds and brokers.\n\nOrdered by `(exchange, symbol, token, isin)` so it can key a `BTreeMap` and sort a dataset deterministically.",
+          "properties": {
+            "exchange": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Exchange"
+                }
+              ],
+              "description": "Exchange venue"
+            },
+            "isin": {
+              "description": "International Securities Identification Number (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "symbol": {
+              "description": "Trading symbol (e.g., \"RELIANCE\", \"TCS\", \"INFY\")",
+              "type": "string"
+            },
+            "token": {
+              "description": "Broker-assigned instrument token (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "exchange",
+            "symbol"
+          ],
+          "type": "object"
+        }
+      },
+      "description": "Modify request for an existing order.",
+      "properties": {
+        "algo_id": {
+          "description": "Algo ID associated with the modification",
+          "type": "string"
+        },
+        "client_id": {
+          "description": "Optional client ID",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "instrument": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/InstrumentId"
+            }
+          ],
+          "description": "Instrument to modify"
+        },
+        "new_price": {
+          "description": "New limit price if applicable (None leaves price unchanged)",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "new_qty": {
+          "description": "New quantity (None leaves quantity unchanged)",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "algo_id",
+        "instrument"
+      ],
+      "title": "ModifyRequest",
+      "type": "object"
+    },
+    "Money": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "Currency": {
+          "description": "Currency enum.\n\nThe minor-unit table lives here, in the kernel, so every consumer (Rust crates, the Python SDK through `vyapaar._vyapaar.currency_minor_units`) reads one table instead of keeping its own copy.",
+          "oneOf": [
+            {
+              "description": "Indian Rupee",
+              "enum": [
+                "Inr"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "United States Dollar",
+              "enum": [
+                "Usd"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Euro",
+              "enum": [
+                "Eur"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "British Pound",
+              "enum": [
+                "Gbp"
+              ],
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "description": "Explicit monetary amount with currency.",
+      "properties": {
+        "amount": {
+          "description": "Exact amount",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "currency": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Currency"
+            }
+          ],
+          "description": "Currency"
+        }
+      },
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "title": "Money",
+      "type": "object"
+    },
+    "OrderAck": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "OrderStatus": {
+          "description": "Lifecycle status of an order.",
+          "oneOf": [
+            {
+              "description": "Order created locally, awaiting transmission.",
+              "enum": [
+                "pending_new"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Order acknowledged by broker/exchange.",
+              "enum": [
+                "new"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Order partially filled.",
+              "enum": [
+                "partially_filled"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Order completely filled.",
+              "enum": [
+                "filled"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Order cancelled by user or algorithm.",
+              "enum": [
+                "cancelled"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Order rejected by broker or exchange.",
+              "enum": [
+                "rejected"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Order expired at market close or TIF expiration.",
+              "enum": [
+                "expired"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "TraceContext": {
+          "description": "Zero-dependency W3C trace context carrier.\n\nImplements the W3C Trace Context Level 1 specification (`traceparent` header). Enables end-to-end distributed tracing across microservices, asynchronous actor hops, audit logs, and external bridges with zero external crate dependencies.",
+          "properties": {
+            "span_id": {
+              "description": "8-byte parent or current span identifier.",
+              "items": {
+                "format": "uint8",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              "maxItems": 8,
+              "minItems": 8,
+              "type": "array"
+            },
+            "trace_flags": {
+              "description": "8-bit trace options flags (bit 0 = recorded/sampled).",
+              "format": "uint8",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "trace_id": {
+              "description": "16-byte distributed trace identifier.",
+              "items": {
+                "format": "uint8",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              "maxItems": 16,
+              "minItems": 16,
+              "type": "array"
+            }
+          },
+          "required": [
+            "span_id",
+            "trace_flags",
+            "trace_id"
+          ],
+          "type": "object"
+        }
+      },
+      "description": "Acknowledgment of order placement from broker or execution engine.",
+      "properties": {
+        "client_id": {
+          "description": "Optional client ID",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "client_order_id": {
+          "description": "Client-specified correlation ID",
+          "format": "uuid",
+          "type": "string"
+        },
+        "correlation_id": {
+          "description": "Distributed trace correlation ID",
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "exchange_order_id": {
+          "description": "Exchange-assigned order ID (if already available)",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "order_id": {
+          "description": "Broker-assigned order ID",
+          "type": "string"
+        },
+        "status": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/OrderStatus"
+            }
+          ],
+          "description": "Current status"
+        },
+        "timestamp": {
+          "description": "Acknowledgment timestamp",
+          "format": "date-time",
+          "type": "string"
+        },
+        "trace_context": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/TraceContext"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Optional W3C distributed trace context"
+        }
+      },
+      "required": [
+        "client_order_id",
+        "order_id",
+        "status",
+        "timestamp"
+      ],
+      "title": "OrderAck",
+      "type": "object"
+    },
+    "OrderEvent": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "Currency": {
+          "description": "Currency enum.\n\nThe minor-unit table lives here, in the kernel, so every consumer (Rust crates, the Python SDK through `vyapaar._vyapaar.currency_minor_units`) reads one table instead of keeping its own copy.",
+          "oneOf": [
+            {
+              "description": "Indian Rupee",
+              "enum": [
+                "Inr"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "United States Dollar",
+              "enum": [
+                "Usd"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Euro",
+              "enum": [
+                "Eur"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "British Pound",
+              "enum": [
+                "Gbp"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "Exchange": {
+          "description": "Supported exchanges in the Indian market.\n\nThis is the canonical [`Exchange`] vocabulary: downstream bounded contexts (`vyapaar-ledger`, `vyapaar-market`, `vyapaar-exec`) must never redefine their own exchange enums, only re-use this one.",
+          "oneOf": [
+            {
+              "description": "National Stock Exchange of India",
+              "enum": [
+                "NSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Bombay Stock Exchange",
+              "enum": [
+                "BSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "NSE Futures & Options segment (derivatives)",
+              "enum": [
+                "NFO"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Multi Commodity Exchange of India",
+              "enum": [
+                "MCX"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Currency Derivatives Segment",
+              "enum": [
+                "CDS"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "FeeBreakdown": {
+          "description": "Itemized Indian equity/F&O transaction cost breakdown for a single fill.\n\nEach component is computed by `vyapaar-market-finance::india::costs`'s statutory calculators; this type is just the shared wire shape they fill in.",
+          "properties": {
+            "brokerage": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Broker commission."
+            },
+            "exchange_charges": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Exchange transaction charges."
+            },
+            "gst": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Goods and Services Tax (on brokerage + exchange charges)."
+            },
+            "sebi_charges": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "SEBI turnover fees."
+            },
+            "stamp_duty": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Stamp duty."
+            },
+            "stt": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Securities Transaction Tax."
+            }
+          },
+          "required": [
+            "brokerage",
+            "exchange_charges",
+            "gst",
+            "sebi_charges",
+            "stamp_duty",
+            "stt"
+          ],
+          "type": "object"
+        },
+        "InstrumentId": {
+          "description": "Canonical instrument identifier across all feeds and brokers.\n\nOrdered by `(exchange, symbol, token, isin)` so it can key a `BTreeMap` and sort a dataset deterministically.",
+          "properties": {
+            "exchange": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Exchange"
+                }
+              ],
+              "description": "Exchange venue"
+            },
+            "isin": {
+              "description": "International Securities Identification Number (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "symbol": {
+              "description": "Trading symbol (e.g., \"RELIANCE\", \"TCS\", \"INFY\")",
+              "type": "string"
+            },
+            "token": {
+              "description": "Broker-assigned instrument token (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "exchange",
+            "symbol"
+          ],
+          "type": "object"
+        },
+        "Money": {
+          "description": "Explicit monetary amount with currency.",
+          "properties": {
+            "amount": {
+              "description": "Exact amount",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "currency": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Currency"
+                }
+              ],
+              "description": "Currency"
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "type": "object"
+        },
+        "OrderSide": {
+          "description": "Order side.",
+          "oneOf": [
+            {
+              "description": "Buy order",
+              "enum": [
+                "BUY"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Sell order",
+              "enum": [
+                "SELL"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "OrderStatus": {
+          "description": "Lifecycle status of an order.",
+          "oneOf": [
+            {
+              "description": "Order created locally, awaiting transmission.",
+              "enum": [
+                "pending_new"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Order acknowledged by broker/exchange.",
+              "enum": [
+                "new"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Order partially filled.",
+              "enum": [
+                "partially_filled"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Order completely filled.",
+              "enum": [
+                "filled"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Order cancelled by user or algorithm.",
+              "enum": [
+                "cancelled"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Order rejected by broker or exchange.",
+              "enum": [
+                "rejected"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Order expired at market close or TIF expiration.",
+              "enum": [
+                "expired"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "RejectReason": {
+          "description": "Reason an order or modification was refused after submission (by the exchange/broker, or by expiring unfilled).\n\nDistinct from a pre-trade risk-gate refusal, which never produces an [`OrderEvent`] at all — see [`crate::events::ExecutionEvent::RiskRefused`].",
+          "oneOf": [
+            {
+              "description": "Rejected by the exchange or broker, with their message.",
+              "properties": {
+                "detail": {
+                  "type": "string"
+                },
+                "reason": {
+                  "enum": [
+                    "exchange_rejected"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "detail",
+                "reason"
+              ],
+              "type": "object"
+            },
+            {
+              "description": "Expired unfilled per its time-in-force.",
+              "properties": {
+                "reason": {
+                  "enum": [
+                    "expired"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "type": "object"
+            },
+            {
+              "description": "Refused for insufficient margin.",
+              "properties": {
+                "reason": {
+                  "enum": [
+                    "insufficient_margin"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "reason"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "TraceContext": {
+          "description": "Zero-dependency W3C trace context carrier.\n\nImplements the W3C Trace Context Level 1 specification (`traceparent` header). Enables end-to-end distributed tracing across microservices, asynchronous actor hops, audit logs, and external bridges with zero external crate dependencies.",
+          "properties": {
+            "span_id": {
+              "description": "8-byte parent or current span identifier.",
+              "items": {
+                "format": "uint8",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              "maxItems": 8,
+              "minItems": 8,
+              "type": "array"
+            },
+            "trace_flags": {
+              "description": "8-bit trace options flags (bit 0 = recorded/sampled).",
+              "format": "uint8",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "trace_id": {
+              "description": "16-byte distributed trace identifier.",
+              "items": {
+                "format": "uint8",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              "maxItems": 16,
+              "minItems": 16,
+              "type": "array"
+            }
+          },
+          "required": [
+            "span_id",
+            "trace_flags",
+            "trace_id"
+          ],
+          "type": "object"
+        }
+      },
+      "description": "A single lifecycle event for an order, wrapping the existing acknowledgement/fill/rejection/cancellation payloads into one stream type.",
+      "oneOf": [
+        {
+          "description": "The order was acknowledged by the broker/exchange.",
+          "properties": {
+            "client_id": {
+              "description": "Optional client ID",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "client_order_id": {
+              "description": "Client-specified correlation ID",
+              "format": "uuid",
+              "type": "string"
+            },
+            "correlation_id": {
+              "description": "Distributed trace correlation ID",
+              "format": "uuid",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "exchange_order_id": {
+              "description": "Exchange-assigned order ID (if already available)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "kind": {
+              "enum": [
+                "acked"
+              ],
+              "type": "string"
+            },
+            "order_id": {
+              "description": "Broker-assigned order ID",
+              "type": "string"
+            },
+            "status": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/OrderStatus"
+                }
+              ],
+              "description": "Current status"
+            },
+            "timestamp": {
+              "description": "Acknowledgment timestamp",
+              "format": "date-time",
+              "type": "string"
+            },
+            "trace_context": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/TraceContext"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional W3C distributed trace context"
+            }
+          },
+          "required": [
+            "client_order_id",
+            "kind",
+            "order_id",
+            "status",
+            "timestamp"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The order (or part of it) was filled.",
+          "properties": {
+            "account_id": {
+              "description": "Optional account ID (defaults to \"default\" if not provided)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "algo_id": {
+              "description": "Associated algorithm ID",
+              "type": "string"
+            },
+            "client_id": {
+              "description": "Optional client ID",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "client_order_id": {
+              "description": "Associated client correlation ID",
+              "format": "uuid",
+              "type": "string"
+            },
+            "correlation_id": {
+              "description": "Distributed trace correlation ID",
+              "format": "uuid",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "fee": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "default": {
+                "amount": "0",
+                "currency": "Inr"
+              },
+              "description": "Total transaction cost charged on this fill (brokerage, statutory levies, and exchange charges combined), in the fill's currency.\n\nDefaults to zero for callers that don't yet have cost data (e.g. a simulated/paper fill). The statutory calculation itself lives in `vyapaar-market` (`vyapaar-market-finance::india::costs`); this crate only owns the contract."
+            },
+            "fee_breakdown": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/FeeBreakdown"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Itemized breakdown of [`FillReport::fee`], when the caller has it."
+            },
+            "fill_id": {
+              "description": "Unique fill identifier",
+              "type": "string"
+            },
+            "instrument": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/InstrumentId"
+                }
+              ],
+              "description": "Traded instrument"
+            },
+            "kind": {
+              "enum": [
+                "filled"
+              ],
+              "type": "string"
+            },
+            "order_id": {
+              "description": "Associated broker order ID",
+              "type": "string"
+            },
+            "price": {
+              "description": "Exact execution price",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "quantity": {
+              "description": "Executed quantity",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "side": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/OrderSide"
+                }
+              ],
+              "description": "Order side"
+            },
+            "timestamp": {
+              "description": "Execution timestamp",
+              "format": "date-time",
+              "type": "string"
+            },
+            "trace_context": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/TraceContext"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Optional W3C distributed trace context"
+            }
+          },
+          "required": [
+            "algo_id",
+            "client_order_id",
+            "fill_id",
+            "instrument",
+            "kind",
+            "order_id",
+            "price",
+            "quantity",
+            "side",
+            "timestamp"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The order was rejected after submission.",
+          "properties": {
+            "kind": {
+              "enum": [
+                "rejected"
+              ],
+              "type": "string"
+            },
+            "order_id": {
+              "description": "This platform's order id.",
+              "type": "string"
+            },
+            "reason": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/RejectReason"
+                }
+              ],
+              "description": "Why it was rejected."
+            }
+          },
+          "required": [
+            "kind",
+            "order_id",
+            "reason"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "The order was cancelled.",
+          "properties": {
+            "kind": {
+              "enum": [
+                "cancelled"
+              ],
+              "type": "string"
+            },
+            "order_id": {
+              "description": "This platform's order id.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "order_id"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "OrderEvent"
+    },
+    "OrderRequest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "Exchange": {
+          "description": "Supported exchanges in the Indian market.\n\nThis is the canonical [`Exchange`] vocabulary: downstream bounded contexts (`vyapaar-ledger`, `vyapaar-market`, `vyapaar-exec`) must never redefine their own exchange enums, only re-use this one.",
+          "oneOf": [
+            {
+              "description": "National Stock Exchange of India",
+              "enum": [
+                "NSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Bombay Stock Exchange",
+              "enum": [
+                "BSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "NSE Futures & Options segment (derivatives)",
+              "enum": [
+                "NFO"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Multi Commodity Exchange of India",
+              "enum": [
+                "MCX"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Currency Derivatives Segment",
+              "enum": [
+                "CDS"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "InstrumentId": {
+          "description": "Canonical instrument identifier across all feeds and brokers.\n\nOrdered by `(exchange, symbol, token, isin)` so it can key a `BTreeMap` and sort a dataset deterministically.",
+          "properties": {
+            "exchange": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Exchange"
+                }
+              ],
+              "description": "Exchange venue"
+            },
+            "isin": {
+              "description": "International Securities Identification Number (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "symbol": {
+              "description": "Trading symbol (e.g., \"RELIANCE\", \"TCS\", \"INFY\")",
+              "type": "string"
+            },
+            "token": {
+              "description": "Broker-assigned instrument token (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "exchange",
+            "symbol"
+          ],
+          "type": "object"
+        },
+        "OrderSide": {
+          "description": "Order side.",
+          "oneOf": [
+            {
+              "description": "Buy order",
+              "enum": [
+                "BUY"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Sell order",
+              "enum": [
+                "SELL"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "OrderType": {
+          "description": "Order type specification.",
+          "oneOf": [
+            {
+              "description": "Execute immediately at prevailing market price.",
+              "properties": {
+                "type": {
+                  "enum": [
+                    "market"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type"
+              ],
+              "type": "object"
+            },
+            {
+              "description": "Execute at specified limit price or better.",
+              "properties": {
+                "price": {
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "limit"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "price",
+                "type"
+              ],
+              "type": "object"
+            },
+            {
+              "description": "Stop-loss order triggered at trigger price.",
+              "properties": {
+                "price": {
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "stop_loss"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "price",
+                "type"
+              ],
+              "type": "object"
+            },
+            {
+              "description": "Stop-limit order with separate trigger and limit prices.",
+              "properties": {
+                "price": {
+                  "properties": {
+                    "limit": {
+                      "description": "Limit price",
+                      "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                      "type": "string"
+                    },
+                    "trigger": {
+                      "description": "Trigger price",
+                      "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "limit",
+                    "trigger"
+                  ],
+                  "type": "object"
+                },
+                "type": {
+                  "enum": [
+                    "stop_limit"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "price",
+                "type"
+              ],
+              "type": "object"
+            }
+          ]
+        },
+        "TimeInForce": {
+          "description": "Time in force.",
+          "oneOf": [
+            {
+              "description": "Order valid for the trading day.",
+              "enum": [
+                "DAY"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Immediate or Cancel (unfilled portion is cancelled).",
+              "enum": [
+                "IOC"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Good 'Til Cancelled.",
+              "enum": [
+                "GTC"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "TraceContext": {
+          "description": "Zero-dependency W3C trace context carrier.\n\nImplements the W3C Trace Context Level 1 specification (`traceparent` header). Enables end-to-end distributed tracing across microservices, asynchronous actor hops, audit logs, and external bridges with zero external crate dependencies.",
+          "properties": {
+            "span_id": {
+              "description": "8-byte parent or current span identifier.",
+              "items": {
+                "format": "uint8",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              "maxItems": 8,
+              "minItems": 8,
+              "type": "array"
+            },
+            "trace_flags": {
+              "description": "8-bit trace options flags (bit 0 = recorded/sampled).",
+              "format": "uint8",
+              "minimum": 0.0,
+              "type": "integer"
+            },
+            "trace_id": {
+              "description": "16-byte distributed trace identifier.",
+              "items": {
+                "format": "uint8",
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              "maxItems": 16,
+              "minItems": 16,
+              "type": "array"
+            }
+          },
+          "required": [
+            "span_id",
+            "trace_flags",
+            "trace_id"
+          ],
+          "type": "object"
+        }
+      },
+      "description": "Request to place a new order.\n\nNOTE: In compliance with SEBI's Retail Algo Circular, every order request MUST carry a non-empty `algo_id` uniquely identifying the algorithmic strategy.",
+      "properties": {
+        "algo_id": {
+          "description": "SEBI-mandated unique algorithm identifier",
+          "type": "string"
+        },
+        "client_id": {
+          "description": "Optional client ID / account ID",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "client_order_id": {
+          "description": "Unique client correlation ID",
+          "format": "uuid",
+          "type": "string"
+        },
+        "correlation_id": {
+          "description": "Optional correlation ID for tracing across async actor hops",
+          "format": "uuid",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "instrument": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/InstrumentId"
+            }
+          ],
+          "description": "Instrument to trade"
+        },
+        "order_type": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/OrderType"
+            }
+          ],
+          "description": "Pricing instructions"
+        },
+        "quantity": {
+          "description": "Quantity to execute",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "side": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/OrderSide"
+            }
+          ],
+          "description": "Order direction"
+        },
+        "tag": {
+          "description": "Optional strategy user tag",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "tif": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/TimeInForce"
+            }
+          ],
+          "description": "Validity of the order"
+        },
+        "trace_context": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/TraceContext"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Optional W3C distributed trace context"
+        }
+      },
+      "required": [
+        "algo_id",
+        "client_order_id",
+        "instrument",
+        "order_type",
+        "quantity",
+        "side",
+        "tif"
+      ],
+      "title": "OrderRequest",
+      "type": "object"
+    },
+    "PortfolioSnapshot": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "Currency": {
+          "description": "Currency enum.\n\nThe minor-unit table lives here, in the kernel, so every consumer (Rust crates, the Python SDK through `vyapaar._vyapaar.currency_minor_units`) reads one table instead of keeping its own copy.",
+          "oneOf": [
+            {
+              "description": "Indian Rupee",
+              "enum": [
+                "Inr"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "United States Dollar",
+              "enum": [
+                "Usd"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Euro",
+              "enum": [
+                "Eur"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "British Pound",
+              "enum": [
+                "Gbp"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "Exchange": {
+          "description": "Supported exchanges in the Indian market.\n\nThis is the canonical [`Exchange`] vocabulary: downstream bounded contexts (`vyapaar-ledger`, `vyapaar-market`, `vyapaar-exec`) must never redefine their own exchange enums, only re-use this one.",
+          "oneOf": [
+            {
+              "description": "National Stock Exchange of India",
+              "enum": [
+                "NSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Bombay Stock Exchange",
+              "enum": [
+                "BSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "NSE Futures & Options segment (derivatives)",
+              "enum": [
+                "NFO"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Multi Commodity Exchange of India",
+              "enum": [
+                "MCX"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Currency Derivatives Segment",
+              "enum": [
+                "CDS"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "InstrumentId": {
+          "description": "Canonical instrument identifier across all feeds and brokers.\n\nOrdered by `(exchange, symbol, token, isin)` so it can key a `BTreeMap` and sort a dataset deterministically.",
+          "properties": {
+            "exchange": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Exchange"
+                }
+              ],
+              "description": "Exchange venue"
+            },
+            "isin": {
+              "description": "International Securities Identification Number (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "symbol": {
+              "description": "Trading symbol (e.g., \"RELIANCE\", \"TCS\", \"INFY\")",
+              "type": "string"
+            },
+            "token": {
+              "description": "Broker-assigned instrument token (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "exchange",
+            "symbol"
+          ],
+          "type": "object"
+        },
+        "Money": {
+          "description": "Explicit monetary amount with currency.",
+          "properties": {
+            "amount": {
+              "description": "Exact amount",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "currency": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Currency"
+                }
+              ],
+              "description": "Currency"
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "type": "object"
+        },
+        "PortfolioAccount": {
+          "description": "Identifies the account a snapshot belongs to.",
+          "properties": {
+            "account_id": {
+              "description": "Broker or internal account identifier.",
+              "type": "string"
+            },
+            "mode": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/PortfolioMode"
+                }
+              ],
+              "description": "Live, paper, or backtest."
+            },
+            "source": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/PortfolioSource"
+                }
+              ],
+              "description": "Broker-reconciled or simulated."
+            }
+          },
+          "required": [
+            "account_id",
+            "mode",
+            "source"
+          ],
+          "type": "object"
+        },
+        "PortfolioGreeks": {
+          "description": "Aggregate options Greeks for a portfolio (or a single position).",
+          "properties": {
+            "delta": {
+              "description": "Price sensitivity.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "gamma": {
+              "description": "Delta's sensitivity to price.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "theta": {
+              "description": "Time decay.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "vega": {
+              "description": "Sensitivity to implied volatility.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "delta",
+            "gamma",
+            "theta",
+            "vega"
+          ],
+          "type": "object"
+        },
+        "PortfolioHolding": {
+          "description": "A T+1 delivery holding (as opposed to an intraday position).",
+          "properties": {
+            "avg_price": {
+              "description": "Volume-weighted average acquisition price.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "current_value": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Current mark-to-market value of the holding."
+            },
+            "instrument": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/InstrumentId"
+                }
+              ],
+              "description": "The instrument held."
+            },
+            "quantity": {
+              "description": "Quantity held.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "avg_price",
+            "current_value",
+            "instrument",
+            "quantity"
+          ],
+          "type": "object"
+        },
+        "PortfolioMode": {
+          "description": "Where a portfolio's numbers come from.",
+          "oneOf": [
+            {
+              "description": "Real money, real broker.",
+              "enum": [
+                "live"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Simulated fills against a real broker account/paper account.",
+              "enum": [
+                "paper"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Historical backtest run.",
+              "enum": [
+                "backtest"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "PortfolioPosition": {
+          "description": "An open intraday or carried position.",
+          "properties": {
+            "avg_price": {
+              "description": "Volume-weighted average entry price.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "instrument": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/InstrumentId"
+                }
+              ],
+              "description": "The instrument held."
+            },
+            "quantity": {
+              "description": "Net quantity held.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "realized_pnl": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Profit/loss already realized on this instrument today."
+            },
+            "side": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/PositionSide"
+                }
+              ],
+              "description": "Net direction."
+            },
+            "unrealized_pnl": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Mark-to-market profit/loss, not yet realized."
+            }
+          },
+          "required": [
+            "avg_price",
+            "instrument",
+            "quantity",
+            "realized_pnl",
+            "side",
+            "unrealized_pnl"
+          ],
+          "type": "object"
+        },
+        "PortfolioSource": {
+          "description": "Where a portfolio's positions were sourced from.",
+          "oneOf": [
+            {
+              "description": "Reconciled from the broker's own books.",
+              "enum": [
+                "broker"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Tracked entirely in-process (paper/backtest).",
+              "enum": [
+                "simulated"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "PortfolioTotals": {
+          "description": "Account-level cash and margin totals.",
+          "properties": {
+            "cash": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Free cash balance."
+            },
+            "margin_available": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Margin still available to deploy."
+            },
+            "margin_used": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Margin currently blocked by open positions/orders."
+            },
+            "net_worth": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Net worth: cash plus mark-to-market value of all holdings/positions."
+            },
+            "total_pnl": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Total profit/loss, realized plus unrealized."
+            }
+          },
+          "required": [
+            "cash",
+            "margin_available",
+            "margin_used",
+            "net_worth",
+            "total_pnl"
+          ],
+          "type": "object"
+        },
+        "PositionSide": {
+          "description": "Direction of a held or closed position.\n\nDistinct from [`crate::order::OrderSide`], which is the side of a single order or fill, not the resulting net position.",
+          "oneOf": [
+            {
+              "description": "Net long.",
+              "enum": [
+                "LONG"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Net short.",
+              "enum": [
+                "SHORT"
+              ],
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "description": "A full point-in-time view of an account's positions, holdings, and totals — the wire contract served by the portfolio API and consumed by the dashboard.",
+      "properties": {
+        "account": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PortfolioAccount"
+            }
+          ],
+          "description": "Which account this snapshot describes."
+        },
+        "greeks": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/PortfolioGreeks"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "Aggregate options Greeks, if the account holds any options."
+        },
+        "holdings": {
+          "description": "T+1 delivery holdings.",
+          "items": {
+            "$ref": "#/definitions/PortfolioHolding"
+          },
+          "type": "array"
+        },
+        "positions": {
+          "description": "Open intraday/carried positions.",
+          "items": {
+            "$ref": "#/definitions/PortfolioPosition"
+          },
+          "type": "array"
+        },
+        "timestamp": {
+          "description": "When this snapshot was taken.",
+          "format": "date-time",
+          "type": "string"
+        },
+        "totals": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PortfolioTotals"
+            }
+          ],
+          "description": "Cash/margin/PnL totals."
+        }
+      },
+      "required": [
+        "account",
+        "holdings",
+        "positions",
+        "timestamp",
+        "totals"
+      ],
+      "title": "PortfolioSnapshot",
+      "type": "object"
+    },
+    "PositionSizingRequest": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "Currency": {
+          "description": "Currency enum.\n\nThe minor-unit table lives here, in the kernel, so every consumer (Rust crates, the Python SDK through `vyapaar._vyapaar.currency_minor_units`) reads one table instead of keeping its own copy.",
+          "oneOf": [
+            {
+              "description": "Indian Rupee",
+              "enum": [
+                "Inr"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "United States Dollar",
+              "enum": [
+                "Usd"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Euro",
+              "enum": [
+                "Eur"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "British Pound",
+              "enum": [
+                "Gbp"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "Exchange": {
+          "description": "Supported exchanges in the Indian market.\n\nThis is the canonical [`Exchange`] vocabulary: downstream bounded contexts (`vyapaar-ledger`, `vyapaar-market`, `vyapaar-exec`) must never redefine their own exchange enums, only re-use this one.",
+          "oneOf": [
+            {
+              "description": "National Stock Exchange of India",
+              "enum": [
+                "NSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Bombay Stock Exchange",
+              "enum": [
+                "BSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "NSE Futures & Options segment (derivatives)",
+              "enum": [
+                "NFO"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Multi Commodity Exchange of India",
+              "enum": [
+                "MCX"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Currency Derivatives Segment",
+              "enum": [
+                "CDS"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "InstrumentId": {
+          "description": "Canonical instrument identifier across all feeds and brokers.\n\nOrdered by `(exchange, symbol, token, isin)` so it can key a `BTreeMap` and sort a dataset deterministically.",
+          "properties": {
+            "exchange": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Exchange"
+                }
+              ],
+              "description": "Exchange venue"
+            },
+            "isin": {
+              "description": "International Securities Identification Number (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "symbol": {
+              "description": "Trading symbol (e.g., \"RELIANCE\", \"TCS\", \"INFY\")",
+              "type": "string"
+            },
+            "token": {
+              "description": "Broker-assigned instrument token (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "exchange",
+            "symbol"
+          ],
+          "type": "object"
+        },
+        "Money": {
+          "description": "Explicit monetary amount with currency.",
+          "properties": {
+            "amount": {
+              "description": "Exact amount",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "currency": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Currency"
+                }
+              ],
+              "description": "Currency"
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "type": "object"
+        },
+        "PositionSide": {
+          "description": "Direction of a held or closed position.\n\nDistinct from [`crate::order::OrderSide`], which is the side of a single order or fill, not the resulting net position.",
+          "oneOf": [
+            {
+              "description": "Net long.",
+              "enum": [
+                "LONG"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Net short.",
+              "enum": [
+                "SHORT"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "RiskBudget": {
+          "description": "Risk parameters and sizing constraints for a trade or portfolio.",
+          "properties": {
+            "equity": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                }
+              ],
+              "description": "Total account equity available for risk allocation."
+            },
+            "freeze_limit_qty": {
+              "description": "Scrip freeze limit (exchange-mandated single order quantity ceiling), if configured.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "max_portfolio_risk_pct": {
+              "description": "Maximum portfolio aggregate risk percentage, if configured.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "max_position_notional": {
+              "anyOf": [
+                {
+                  "$ref": "#/definitions/Money"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Maximum position notional cash cap, if configured."
+            },
+            "max_position_qty": {
+              "description": "Maximum position share or contract quantity cap, if configured.",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "min_lot_size": {
+              "description": "Instrument minimum lot size (e.g. 1 for equities, 25/50 for index derivatives).",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "risk_pct": {
+              "description": "Default risk fraction per trade (e.g. 0.01 for 1%).",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "equity",
+            "min_lot_size",
+            "risk_pct"
+          ],
+          "type": "object"
+        },
+        "SizingMethod": {
+          "description": "Permissible dynamic position sizing models.",
+          "oneOf": [
+            {
+              "additionalProperties": false,
+              "description": "Risk a fixed fraction/percentage of account equity per trade (e.g. 0.01 for 1%).",
+              "properties": {
+                "risk_pct": {
+                  "description": "Risk fraction of equity (e.g. 0.01 represents 1%).",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "fixed_fractional"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "risk_pct",
+                "type"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "Size inversely proportional to instrument volatility (ATR or standard deviation).",
+              "properties": {
+                "lookback_bars": {
+                  "description": "Lookback window in bars used for volatility computation.",
+                  "format": "uint",
+                  "minimum": 0.0,
+                  "type": "integer"
+                },
+                "target_annual_vol": {
+                  "description": "Target annualized volatility (e.g. 0.15 for 15%).",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "volatility_target"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "lookback_bars",
+                "target_annual_vol",
+                "type"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "Optimal growth sizing with damping fraction (e.g. half-Kelly).",
+              "properties": {
+                "fraction": {
+                  "description": "Kelly multiplier fraction (e.g. 0.5 for half-Kelly).",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "payoff_ratio": {
+                  "description": "Payoff ratio (average win / average loss).",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "type": {
+                  "enum": [
+                    "kelly_criterion"
+                  ],
+                  "type": "string"
+                },
+                "win_rate": {
+                  "description": "Expected historical win rate in `[0, 1]`.",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "fraction",
+                "payoff_ratio",
+                "type",
+                "win_rate"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "Allocate risk budget equally across all active signal candidates.",
+              "properties": {
+                "type": {
+                  "enum": [
+                    "equal_risk_contribution"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "type"
+              ],
+              "type": "object"
+            },
+            {
+              "additionalProperties": false,
+              "description": "Allocate a fixed cash notional dynamically converted to lot-rounded quantity.",
+              "properties": {
+                "notional": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/Money"
+                    }
+                  ],
+                  "description": "Fixed cash amount to allocate."
+                },
+                "type": {
+                  "enum": [
+                    "fixed_notional"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": [
+                "notional",
+                "type"
+              ],
+              "type": "object"
+            }
+          ]
+        }
+      },
+      "description": "Request to compute dynamic position sizing for an instrument trade intent.",
+      "properties": {
+        "account_equity": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Money"
+            }
+          ],
+          "description": "Available account equity."
+        },
+        "current_volatility": {
+          "description": "Current instrument volatility (ATR or price standard deviation), if computed.",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "entry_price": {
+          "description": "Expected entry price.",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "instrument": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/InstrumentId"
+            }
+          ],
+          "description": "Target instrument to size."
+        },
+        "risk_budget": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/RiskBudget"
+            }
+          ],
+          "description": "Risk budget parameters and limits."
+        },
+        "side": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/PositionSide"
+            }
+          ],
+          "description": "Side of the planned trade."
+        },
+        "sizing_method": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/SizingMethod"
+            }
+          ],
+          "description": "Dynamic position sizing model."
+        },
+        "stop_loss": {
+          "description": "Stop loss price, if defined.",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "account_equity",
+        "entry_price",
+        "instrument",
+        "risk_budget",
+        "side",
+        "sizing_method"
+      ],
+      "title": "PositionSizingRequest",
+      "type": "object"
+    },
+    "PositionSizingResult": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "Currency": {
+          "description": "Currency enum.\n\nThe minor-unit table lives here, in the kernel, so every consumer (Rust crates, the Python SDK through `vyapaar._vyapaar.currency_minor_units`) reads one table instead of keeping its own copy.",
+          "oneOf": [
+            {
+              "description": "Indian Rupee",
+              "enum": [
+                "Inr"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "United States Dollar",
+              "enum": [
+                "Usd"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Euro",
+              "enum": [
+                "Eur"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "British Pound",
+              "enum": [
+                "Gbp"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "Exchange": {
+          "description": "Supported exchanges in the Indian market.\n\nThis is the canonical [`Exchange`] vocabulary: downstream bounded contexts (`vyapaar-ledger`, `vyapaar-market`, `vyapaar-exec`) must never redefine their own exchange enums, only re-use this one.",
+          "oneOf": [
+            {
+              "description": "National Stock Exchange of India",
+              "enum": [
+                "NSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Bombay Stock Exchange",
+              "enum": [
+                "BSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "NSE Futures & Options segment (derivatives)",
+              "enum": [
+                "NFO"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Multi Commodity Exchange of India",
+              "enum": [
+                "MCX"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Currency Derivatives Segment",
+              "enum": [
+                "CDS"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "InstrumentId": {
+          "description": "Canonical instrument identifier across all feeds and brokers.\n\nOrdered by `(exchange, symbol, token, isin)` so it can key a `BTreeMap` and sort a dataset deterministically.",
+          "properties": {
+            "exchange": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Exchange"
+                }
+              ],
+              "description": "Exchange venue"
+            },
+            "isin": {
+              "description": "International Securities Identification Number (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "symbol": {
+              "description": "Trading symbol (e.g., \"RELIANCE\", \"TCS\", \"INFY\")",
+              "type": "string"
+            },
+            "token": {
+              "description": "Broker-assigned instrument token (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "exchange",
+            "symbol"
+          ],
+          "type": "object"
+        },
+        "Money": {
+          "description": "Explicit monetary amount with currency.",
+          "properties": {
+            "amount": {
+              "description": "Exact amount",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "currency": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Currency"
+                }
+              ],
+              "description": "Currency"
+            }
+          },
+          "required": [
+            "amount",
+            "currency"
+          ],
+          "type": "object"
+        }
+      },
+      "description": "Output of dynamic position sizing.",
+      "properties": {
+        "allocated_notional": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Money"
+            }
+          ],
+          "description": "Allocated cash notional (`entry_price * quantity`)."
+        },
+        "capped_by_limit": {
+          "description": "Whether the calculated quantity was reduced by any limit or cap.",
+          "type": "boolean"
+        },
+        "instrument": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/InstrumentId"
+            }
+          ],
+          "description": "Target instrument."
+        },
+        "quantity": {
+          "description": "Computed executable quantity, strictly rounded down to lot size multiples.",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "reason": {
+          "description": "Human-readable explanation or capping detail, if any.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "risk_at_stake": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/Money"
+            }
+          ],
+          "description": "Total capital at risk (`|entry_price - stop_loss| * quantity`)."
+        },
+        "target_weight": {
+          "description": "Target portfolio weight (`allocated_notional / account_equity`).",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "allocated_notional",
+        "capped_by_limit",
+        "instrument",
+        "quantity",
+        "risk_at_stake"
+      ],
+      "title": "PositionSizingResult",
+      "type": "object"
+    },
+    "Price": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+      "title": "Decimal",
+      "type": "string"
+    },
+    "PriceBand": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "description": "Daily scrip-wise or index circuit limit / price band.",
+      "properties": {
+        "band_pct": {
+          "description": "Band percentage if known (e.g., 0.05 for 5%, 0.10 for 10%, 0.20 for 20%)",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "lower": {
+          "description": "Lower price limit (lower circuit)",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "reference_price": {
+          "description": "Previous close or baseline reference price",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        },
+        "upper": {
+          "description": "Upper price limit (upper circuit)",
+          "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "lower",
+        "reference_price",
+        "upper"
+      ],
+      "title": "PriceBand",
+      "type": "object"
+    },
+    "Quantity": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+      "title": "Decimal",
+      "type": "string"
+    },
+    "Tick": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "definitions": {
+        "DepthLevel": {
+          "description": "Level 2 market depth entry.",
+          "properties": {
+            "orders_count": {
+              "description": "Number of open orders at this price (if provided by broker)",
+              "format": "uint32",
+              "minimum": 0.0,
+              "type": [
+                "integer",
+                "null"
+              ]
+            },
+            "price": {
+              "description": "Depth price level",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "quantity": {
+              "description": "Total quantity at this price",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "price",
+            "quantity"
+          ],
+          "type": "object"
+        },
+        "Exchange": {
+          "description": "Supported exchanges in the Indian market.\n\nThis is the canonical [`Exchange`] vocabulary: downstream bounded contexts (`vyapaar-ledger`, `vyapaar-market`, `vyapaar-exec`) must never redefine their own exchange enums, only re-use this one.",
+          "oneOf": [
+            {
+              "description": "National Stock Exchange of India",
+              "enum": [
+                "NSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Bombay Stock Exchange",
+              "enum": [
+                "BSE"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "NSE Futures & Options segment (derivatives)",
+              "enum": [
+                "NFO"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Multi Commodity Exchange of India",
+              "enum": [
+                "MCX"
+              ],
+              "type": "string"
+            },
+            {
+              "description": "Currency Derivatives Segment",
+              "enum": [
+                "CDS"
+              ],
+              "type": "string"
+            }
+          ]
+        },
+        "InstrumentId": {
+          "description": "Canonical instrument identifier across all feeds and brokers.\n\nOrdered by `(exchange, symbol, token, isin)` so it can key a `BTreeMap` and sort a dataset deterministically.",
+          "properties": {
+            "exchange": {
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Exchange"
+                }
+              ],
+              "description": "Exchange venue"
+            },
+            "isin": {
+              "description": "International Securities Identification Number (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "symbol": {
+              "description": "Trading symbol (e.g., \"RELIANCE\", \"TCS\", \"INFY\")",
+              "type": "string"
+            },
+            "token": {
+              "description": "Broker-assigned instrument token (optional)",
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "exchange",
+            "symbol"
+          ],
+          "type": "object"
+        },
+        "PriceBand": {
+          "description": "Daily scrip-wise or index circuit limit / price band.",
+          "properties": {
+            "band_pct": {
+              "description": "Band percentage if known (e.g., 0.05 for 5%, 0.10 for 10%, 0.20 for 20%)",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "lower": {
+              "description": "Lower price limit (lower circuit)",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "reference_price": {
+              "description": "Previous close or baseline reference price",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            },
+            "upper": {
+              "description": "Upper price limit (upper circuit)",
+              "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+              "type": "string"
+            }
+          },
+          "required": [
+            "lower",
+            "reference_price",
+            "upper"
+          ],
+          "type": "object"
+        }
+      },
+      "description": "Canonical typed Tick enum for broker feeds.\n\nIndian broker feeds (Zerodha, Upstox, Fyers) deliver ticks in different shapes: - LTP only (lightweight mode) - Best Bid/Ask quote (with optional price band) - Full 5-level market depth",
+      "oneOf": [
+        {
+          "description": "Last Traded Price tick.",
+          "properties": {
+            "data": {
+              "properties": {
+                "exchange_ts": {
+                  "description": "Exchange timestamp",
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "instrument": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/InstrumentId"
+                    }
+                  ],
+                  "description": "Canonical instrument ID"
+                },
+                "price": {
+                  "description": "Last traded price",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "receive_ts": {
+                  "description": "Local ingestion receive timestamp",
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "volume": {
+                  "description": "Cumulative volume or last traded quantity",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "exchange_ts",
+                "instrument",
+                "price",
+                "receive_ts",
+                "volume"
+              ],
+              "type": "object"
+            },
+            "type": {
+              "enum": [
+                "ltp"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "data",
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Best Bid/Ask top-of-book quote tick.",
+          "properties": {
+            "data": {
+              "properties": {
+                "ask": {
+                  "description": "Best ask price",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "ask_qty": {
+                  "description": "Best ask quantity",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "band": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/definitions/PriceBand"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ],
+                  "description": "Scrip price band enriched by market data feed"
+                },
+                "bid": {
+                  "description": "Best bid price",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "bid_qty": {
+                  "description": "Best bid quantity",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": "string"
+                },
+                "exchange_ts": {
+                  "description": "Exchange timestamp",
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "instrument": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/InstrumentId"
+                    }
+                  ],
+                  "description": "Canonical instrument ID"
+                },
+                "last_price": {
+                  "description": "Last traded price (if available)",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "receive_ts": {
+                  "description": "Local ingestion receive timestamp",
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "ask",
+                "ask_qty",
+                "bid",
+                "bid_qty",
+                "exchange_ts",
+                "instrument",
+                "receive_ts"
+              ],
+              "type": "object"
+            },
+            "type": {
+              "enum": [
+                "quote"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "data",
+            "type"
+          ],
+          "type": "object"
+        },
+        {
+          "description": "Full market depth tick (L2).",
+          "properties": {
+            "data": {
+              "properties": {
+                "asks": {
+                  "description": "Ask depth levels (typically top 5 in Indian markets)",
+                  "items": {
+                    "$ref": "#/definitions/DepthLevel"
+                  },
+                  "type": "array"
+                },
+                "bids": {
+                  "description": "Bid depth levels (typically top 5 in Indian markets)",
+                  "items": {
+                    "$ref": "#/definitions/DepthLevel"
+                  },
+                  "type": "array"
+                },
+                "exchange_ts": {
+                  "description": "Exchange timestamp",
+                  "format": "date-time",
+                  "type": "string"
+                },
+                "instrument": {
+                  "allOf": [
+                    {
+                      "$ref": "#/definitions/InstrumentId"
+                    }
+                  ],
+                  "description": "Canonical instrument ID"
+                },
+                "last_price": {
+                  "description": "Last traded price",
+                  "pattern": "^-?[0-9]+(\\.[0-9]+)?$",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "receive_ts": {
+                  "description": "Local ingestion receive timestamp",
+                  "format": "date-time",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "asks",
+                "bids",
+                "exchange_ts",
+                "instrument",
+                "receive_ts"
+              ],
+              "type": "object"
+            },
+            "type": {
+              "enum": [
+                "depth"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "data",
+            "type"
+          ],
+          "type": "object"
+        }
+      ],
+      "title": "Tick"
+    }
+  },
+  "description": "Generated deterministically by vyapaar-ffi-codegen; do not edit by hand.",
+  "title": "vyapaar-core wire schema",
+  "version": 8
+}

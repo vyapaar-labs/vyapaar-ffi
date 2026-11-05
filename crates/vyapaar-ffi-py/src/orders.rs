@@ -32,6 +32,8 @@ pub struct OrderRequest {
 }
 
 impl OrderRequest {
+    /// Lift a core `OrderRequest` into its Python wrapper (public Rust API).
+    #[allow(dead_code)]
     pub(crate) fn from_core(inner: vyapaar_core::OrderRequest) -> Self {
         Self { inner }
     }
@@ -40,6 +42,7 @@ impl OrderRequest {
 #[pymethods]
 impl OrderRequest {
     #[new]
+    #[allow(clippy::too_many_arguments)]
     #[pyo3(signature = (instrument, side, order_type, quantity, algo_id, *, client_order_id=None, limit_price=None, trigger_price=None, tif="DAY", tag=None))]
     fn new(
         instrument: &Bound<'_, InstrumentId>,
@@ -261,6 +264,8 @@ pub struct FillReport {
 }
 
 impl FillReport {
+    /// Lift a core `FillReport` into its Python wrapper (public Rust API).
+    #[allow(dead_code)]
     pub(crate) fn from_core(inner: vyapaar_core::FillReport) -> Self {
         Self { inner }
     }
@@ -269,6 +274,7 @@ impl FillReport {
 #[pymethods]
 impl FillReport {
     #[new]
+    #[allow(clippy::too_many_arguments)]
     fn new(
         fill_id: &str,
         order_id: &str,
@@ -369,6 +375,8 @@ pub struct OrderEvent {
 }
 
 impl OrderEvent {
+    /// Lift a core `OrderEvent` into its Python wrapper (public Rust API).
+    #[allow(dead_code)]
     pub(crate) fn from_core(inner: vyapaar_core::OrderEvent) -> Self {
         Self { inner }
     }
