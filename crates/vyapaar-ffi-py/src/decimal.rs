@@ -15,20 +15,35 @@ use crate::ConversionError;
 /// The dotted name of Python's `decimal` module.
 const DECIMAL_MODULE: &str = "decimal";
 
-/// Convert a Python `decimal.Decimal` (or any object with `__str__`) to its
-/// exact decimal string form. Raises [`ConversionError`] when the string does
-/// not parse as a decimal.
+/// Extract the exact decimal string of a Python object.
+///
+/// Prefers our value-object `to_str()` (so passing a `Price`/`Quantity`
+/// pyclass works), falling back to `__str__` for `decimal.Decimal`, `str`,
+/// `int`, etc.
+fn object_decimal_string(obj: &Bound<'_, PyAny>) -> PyResult<String> {
+    if obj.hasattr("to_str")? {
+        return obj
+            .call_method0("to_str")?
+            .extract::<String>()
+            .map_err(|e| ConversionError::new_err(format!("could not read decimal value: {e}")));
+    }
+    obj.str()?
+        .extract()
+        .map_err(|e| ConversionError::new_err(format!("could not stringify decimal value: {e}")))
+}
+
+/// Convert a Python `decimal.Decimal` (or any `__str__` object) to its exact
+/// decimal string form. Raises [`ConversionError`] when the string does not
+/// parse as a decimal.
 pub fn pydecimal_to_decimal(obj: &Bound<'_, PyAny>) -> PyResult<Decimal> {
-    let s: String = obj.str()?.extract()?;
+    let s = object_decimal_string(obj)?;
     Decimal::from_str(&s).map_err(|e| ConversionError::new_err(format!("invalid decimal: {e}")))
 }
 
 /// Convert a Python `decimal.Decimal` (or any `__str__` object) to an exact
 /// decimal string.
 pub fn pydecimal_to_string(obj: &Bound<'_, PyAny>) -> PyResult<String> {
-    obj.str()?
-        .extract()
-        .map_err(|e| ConversionError::new_err(format!("could not stringify decimal value: {e}")))
+    object_decimal_string(obj)
 }
 
 /// Build a Python `decimal.Decimal` from an exact decimal string.

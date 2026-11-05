@@ -1,0 +1,33 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "vyapaar"
+version = "0.1.0"
+description = "Native Python SDK for the Vyapaar trading core: exact-decimal types, SEBI pre-trade risk gate, and Arrow zero-copy data bridge (compiled from vyapaar-ffi via PyO3)."
+readme = "python/README.md"
+requires-python = ">=3.10"
+license = { text = "AGPL-3.0" }
+keywords = ["trading", "nse", "ffi", "pyo3", "backtesting", "india"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Rust",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "License :: OSI Approved :: GNU Affero General Public License v3",
+]
+
+[project.optional-dependencies]
+arrow = ["pyarrow>=15"]
+test = ["pytest>=8", "pyarrow>=15"]
+
+[tool.maturin]
+python-source = "python"
+module-name = "vyapaar._vyapaar"
+manifest-path = "crates/vyapaar-ffi-py/Cargo.toml"
+features = ["pyo3/extension-module"]
+
+[tool.pytest.ini_options]
+testpaths = ["python/tests"]
+addopts = "-q"
