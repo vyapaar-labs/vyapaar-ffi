@@ -2,9 +2,16 @@
 name = "vyapaar-ffi-codegen"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
+description = "Deterministic JSON Schema, OpenAPI 3.1, and Python type-stub (.pyi) code generator for vyapaar-core wire types"
 
 [dependencies]
 vyapaar-core = { workspace = true }
 serde = { workspace = true }
-thiserror = { workspace = true }
+serde_json = { workspace = true }
+schemars = { workspace = true }
+
+[[bin]]
+name = "vyapaar-codegen"
+path = "src/main.rs"

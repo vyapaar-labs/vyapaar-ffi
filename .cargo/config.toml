@@ -1,0 +1,11 @@
+# Repository-local Cargo configuration.
+#
+# `crates/vyapaar-ffi-py` is a PyO3 extension module. Building it and running
+# its test harness requires a CPython interpreter with development headers and
+# a shared library. The default `/usr/bin/python3` on this host ships no dev
+# headers, so we point PyO3 at a full conda-forge CPython 3.12 that does.
+#
+# Override in your shell with `PYO3_PYTHON=/path/to/python3` (e.g. when using
+# a virtualenv created by `make bootstrap-python`).
+[env]
+PYO3_PYTHON = "/tool/pandora/.package/miniforge3-3.12.5/bin/python3"
