@@ -8,4 +8,4 @@
 # Override in your shell with `PYO3_PYTHON=/path/to/python3` (e.g. when using
 # a virtualenv created by `make bootstrap-python`).
 [env]
-PYO3_PYTHON = "/tool/pandora/.package/miniforge3-3.12.5/bin/python3"
+PYO3_PYTHON = "/usr/bin/python3"
