@@ -20,8 +20,8 @@
 ## 2. Coding Guidelines (DDD & TDD)
 * **Zero Floats Policy**: Decimals across all FFI boundaries (`rust_decimal::Decimal` <-> `decimal.Decimal`).
 * **TDD & Parallel Test Directory Rule (MANDATORY)**:
-  - All tests must live in `tests/` parallel to `src/`.
-  - **STRICTLY FORBIDDEN**: In-file `#[test]` inside `src/`.
+  - All tests must live in `tests/` parallel to `src/`, or in a `src/tests/` module directory.
+  - **STRICTLY FORBIDDEN**: In-file `#[test]` inside production `src/` files.
 
 ---
 
