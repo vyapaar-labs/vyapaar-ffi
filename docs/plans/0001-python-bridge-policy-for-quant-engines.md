@@ -1,6 +1,6 @@
 # 0001 — Python-First Quant Engine Bridge Policy
 
-> **Status**: Proposed — not yet implemented.
+> **Status**: Adopted — settled as standing policy (Layer 2b of the bottoms-up build order). Claims verified against the current `vyapaar-ffi` code; policy/doc-level only, no code changed.
 > **Target Crates**: vyapaar-ffi (policy/doc-level — no new code proposed, this is a design-decision doc)
 > **Depends on reading**:
 > - (none external)
@@ -36,3 +36,5 @@ No new types or modules. The policy itself is the artifact:
 
 ### Phase 1: Policy only — no code changes
 This doc exists so the policy is written down before anyone building a new quant engine crate reaches for a subprocess shortcut. No implementation, no new crate, no code change is proposed in this phase or any other for this specific doc.
+
+**ADOPTED — the standing policy is confirmed.** Verified this round against `vyapaar-ffi` source: `vyapaar-ffi-py` exports bars/ticks as Arrow `RecordBatch` streams via the `arrow_array_stream` `PyCapsule` protocol (`arrow_bridge.rs`), and Rust-side batch work releases the GIL via `py.detach`/`py.allow_threads` (`runner.rs`), exactly as §2 prescribes. Any future Python-first statistical/numerical engine (GARCH, HMM, copulas, panel econometrics, `QuantLib` pricing) must cite this doc and use `vyapaar-ffi-py` — never a subprocess/CLI shell-out.
