@@ -26,3 +26,4 @@ Build/CI/docs plumbing written and verified: `Makefile` (kept Rust targets + new
 - **Tests only in `tests/`**: no in-file `#[test]`/`#[cfg(test)]` in `src/` (CI `grep` guard fails the build on matches).
 - **PYO3_PYTHON required** to build or test the py crate (set in `.cargo/config.toml`; override via environment).
 - **Do not modify** `crates/**` Rust sources, `python/vyapaar/*.py`, `python/tests/*`, `pyproject.toml`, `.cargo/config.toml` (owned by sibling agent sessions).
+- `docs/migration-guide.md` decimated: sub-crate mapping moved to `docs/design/code-migration-map.md`; verification commands moved to `docs/roadmap/migration-verification.md`; original `migration-guide.md` removed.

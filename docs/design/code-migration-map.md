@@ -1,12 +1,11 @@
-# `vyapaar-ffi` — Subagent Migration & DDD Refactoring Guide
+# `vyapaar-ffi` — Historical Migration Map (honba-tamashii → vyapaar-ffi)
 
 > **Tier**: Tier 4 (Depends on `vyapaar-core`, `vyapaar-risk`, `vyapaar-market`, `vyapaar-runtime`)
 > **Source**: `/home/pmallapp/Devel/Finance/honba-workspace/honba-tamashii`
 > **Target**: `/home/pmallapp/Devel/Finance/vyapaar-labs/vyapaar-ffi`
+> **Status**: Migration complete (all milestones done).
 
----
-
-## 1. Sub-Crate & Directory Mapping
+## Sub-Crate & Directory Mapping
 
 | Source (`honba-tamashii/`) | Target (`vyapaar-ffi/`) | Action |
 | :--- | :--- | :--- |
@@ -17,9 +16,8 @@
 | `python/honba/` | `python/vyapaar/` | Rename package directory and replace `honba` / `_honba` imports with `vyapaar` / `_vyapaar`. |
 | `_honba.pyi`, `__init__.pyi` | `_vyapaar.pyi`, `__init__.pyi` | Update stub files. |
 
----
+## Verification Commands
 
-## 2. Verification Commands
 ```bash
 cd /home/pmallapp/Devel/Finance/vyapaar-labs/vyapaar-ffi
 grep -rn "#\[cfg(test)\]" crates/*/src/ && exit 1 || true
@@ -27,3 +25,20 @@ cargo fmt --check
 cargo clippy --all-targets -- -D warnings
 cargo test --workspace
 ```
+
+## Migration Milestone Status
+
+| Milestone | Status |
+|-----------|--------|
+| `vyapaar-ffi-codegen` ported (JSON Schema + OpenAPI + `.pyi` stubs) | Complete |
+| `vyapaar-ffi-py` ported (PyO3 ABI3 extension `vyapaar._vyapaar`) | Complete |
+| `python/vyapaar/` SDK ported (`Strategy`, `Parameter`, `indicators`, `sizing`, `session`, `data`, `cli`) | Complete |
+| `pyproject.toml` (maturin ABI3 build config) | Complete |
+| Decimal round-tripping verified | Complete |
+| GIL release (`py.detach`/`py.allow_threads`) verified | Complete |
+| Arrow PyCapsule zero-copy export verified | Complete |
+| `cargo test --workspace` | Passing |
+| `pytest` under `python/tests/` | Passing |
+| Zero inline `#[cfg(test)]` in `src/` | Complete |
+| `cargo fmt --check` | Clean |
+| `cargo clippy --all-targets -- -D warnings` | Clean |
