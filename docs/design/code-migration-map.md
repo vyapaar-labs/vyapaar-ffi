@@ -1,8 +1,8 @@
 # `vyapaar-ffi` — Historical Migration Map (honba-tamashii → vyapaar-ffi)
 
 > **Tier**: Tier 4 (Depends on `vyapaar-core`, `vyapaar-risk`, `vyapaar-market`, `vyapaar-runtime`)
-> **Source**: `/home/pmallapp/Devel/Finance/honba-workspace/honba-tamashii`
-> **Target**: `/home/pmallapp/Devel/Finance/vyapaar-labs/vyapaar-ffi`
+> **Source**: `honba-workspace/honba-tamashii`
+> **Target**: `vyapaar-ffi`
 > **Status**: Migration complete (all milestones done).
 
 ## Sub-Crate & Directory Mapping
@@ -19,7 +19,7 @@
 ## Verification Commands
 
 ```bash
-cd /home/pmallapp/Devel/Finance/vyapaar-labs/vyapaar-ffi
+# Run from the repository root
 grep -rn "#\[cfg(test)\]" crates/*/src/ && exit 1 || true
 cargo fmt --check
 cargo clippy --all-targets -- -D warnings
