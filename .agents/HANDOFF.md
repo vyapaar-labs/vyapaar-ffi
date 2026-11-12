@@ -7,7 +7,12 @@ Tier 4 (vyapaar-ffi) implementation complete:
 - Wheel builds via `maturin develop` into `.venv` (editable install of `vyapaar._vyapaar`).
 - `pytest` suite under `python/tests/` green.
 
-Build/CI/docs plumbing written and verified: `Makefile` (kept Rust targets + new `bootstrap-python`/`codegen`/`py-build`/`py-test`/`py`/`all`), `.github/workflows/ci.yml` (rust + python jobs), `README.md`, `docs/roadmap/roadmap.md` (all milestones DONE), `.agents/HANDOFF.md`.
+Build/CI/docs plumbing written and verified: `Makefile` (kept Rust targets + new `bootstrap-python`/`codegen`/`py-build`/`py-test`/`py`/`all`), `.github/workflows/ci.yml` (rust + python jobs), `README.md`, `.agents/HANDOFF.md`.
+
+Docs: `docs/roadmap/` dismantled into `docs/{design,gaps,plans}` (2026-11-12).
+Roadmap milestones are DONE; their status now lives in `docs/design/code-migration-map.md`
+and the per-module design docs. Gaps index added at `docs/gaps/` (CLI stub subcommands
+`0001`, unused `vyapaar-market-*` workspace deps `0002`).
 
 ## Decisions & Discoveries
 - **pyo3 0.30 API**: `Python::attach`/`detach` replace the removed `with_gil`/`allow_threads` surface; `#[pyclass]` items are private by default and must be made public explicitly; extension modules use `abi3-py310`.
@@ -26,4 +31,4 @@ Build/CI/docs plumbing written and verified: `Makefile` (kept Rust targets + new
 - **Tests only in `tests/`**: no in-file `#[test]`/`#[cfg(test)]` in `src/` (CI `grep` guard fails the build on matches).
 - **PYO3_PYTHON required** to build or test the py crate (set in `.cargo/config.toml`; override via environment).
 - **Do not modify** `crates/**` Rust sources, `python/vyapaar/*.py`, `python/tests/*`, `pyproject.toml`, `.cargo/config.toml` (owned by sibling agent sessions).
-- `docs/migration-guide.md` decimated: sub-crate mapping moved to `docs/design/code-migration-map.md`; verification commands moved to `docs/roadmap/migration-verification.md`; original `migration-guide.md` removed.
+- `docs/migration-guide.md` decimated: sub-crate mapping moved to `docs/design/code-migration-map.md`; verification commands folded into the same map; original `migration-guide.md` removed. `docs/roadmap/` removed (dismantled into `docs/{design,gaps,plans}`).

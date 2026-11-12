@@ -19,12 +19,17 @@ pub struct StrategyRunner {
 | Method | Purpose |
 |--------|---------|
 | `new(strategy, algo_id)` | Create runner with strategy + algo ID |
-| `algo_id()` | Return the runner's SEBI algo ID |
+| `algo_id` (getter) | Return the runner's SEBI algo ID |
 | `register_algo(algo_id)` | Register a SEBI algo ID on the internal gate |
-| `kill_switch()` | Trip platform-wide emergency kill switch |
-| `submit_order(...)` | Submit order through mandatory risk gate |
-| `run_bars(bars, ...)` | Batch bar processing (GIL released during Rust aggregation) |
-| `run_ticks(ticks, ...)` | Batch tick processing (GIL released during Rust aggregation) |
+| `halt_global(reason, ts_iso)` | Trip platform-wide emergency kill switch |
+| `resume_global()` | Resume after a kill switch |
+| `set_reduce_only()` | Switch the internal gate to reduce-only |
+| `is_halted()` | Whether the internal gate is halted |
+| `set_price_band(instrument, lower, upper, reference)` | Set a scrip circuit band on the gate |
+| `check_order(order, ts_iso=None)` | Gate an order without dispatching |
+| `submit_order(order, ts_iso=None)` | Gate, simulate a fill, record it, ack `FILLED`, dispatch `on_order_event` |
+| `run_bars(bars)` | Batch bar processing (GIL released during Rust aggregation) |
+| `run_ticks(ticks)` | Batch tick processing (GIL released during Rust aggregation) |
 
 ## GIL Management
 
